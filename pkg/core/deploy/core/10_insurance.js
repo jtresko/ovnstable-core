@@ -1,6 +1,5 @@
-const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
-const {ethers} = require("hardhat");
 const hre = require("hardhat");
+const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
 const {OPTIMISM, ARBITRUM} = require("@overnight-contracts/common/utils/assets");
 const {initWallet, getContract} = require("@overnight-contracts/common/utils/script-utils");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
@@ -10,7 +9,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
     // await deployProxy('InsuranceExchange', deployments, save);
 
-    let insurance = await ethers.getContract('InsuranceExchange')
+    let insurance = await hre.ethers.getContract('InsuranceExchange')
     console.log(`InsuranceExchange deployed at ${insurance.address}`);
 
     let params = {
@@ -19,7 +18,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
     // await deployProxyMulti('InsuranceToken', 'RebaseToken', deployments, save, params);
 
-    let insuranceToken = await ethers.getContract('InsuranceToken')
+    let insuranceToken = await hre.ethers.getContract('InsuranceToken')
     console.log(`InsuranceToken deployed at ${insuranceToken.address}`);
 
     console.log('Name:     ' + await insuranceToken.name());
@@ -35,7 +34,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
     let assetOracle;
     let roleManager;
     let exchange;
-    let stand = process.env.STAND;
+    let stand = process.env.standtoken;
     let blockGetter;
     if (stand === "optimism") {
         asset = OPTIMISM.ovn;

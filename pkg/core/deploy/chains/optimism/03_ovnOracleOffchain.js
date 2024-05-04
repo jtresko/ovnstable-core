@@ -1,5 +1,5 @@
+const hre = require("hardhat");
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
-const {ethers, deployments, getNamedAccounts} = require("hardhat");
 const {OPTIMISM} = require("@overnight-contracts/common/utils/assets");
 const {toE18, toE8} = require("@overnight-contracts/common/utils/decimals");
 const {getContract} = require("@overnight-contracts/common/utils/script-utils");
@@ -10,7 +10,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
     console.log('Deploy OvnOracleOffChain done');
 
-    let oracle = await ethers.getContract('OvnOracleOffChain');
+    let oracle = await hre.ethers.getContract('OvnOracleOffChain');
 
     let roleManager = await getContract('RoleManager', 'optimism');
 

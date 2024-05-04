@@ -1,21 +1,17 @@
 const {
-    getContract,
-    showM2M,
-    showRewardsFromPayout, execTimelock, findEvent, showPoolOperationsFromPayout, showPayoutEvent, transferETH,
-    getWalletAddress, showProfitOnRewardWallet, getPrice
+    getContract, showM2M, execTimelock, showPayoutEvent, transferETH,  getWalletAddress, getPrice
 } = require("@overnight-contracts/common/utils/script-utils");
 const {fromE6, fromAsset, fromUsdPlus} = require("@overnight-contracts/common/utils/decimals");
 const {COMMON} = require("@overnight-contracts/common/utils/assets");
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 const {getOdosSwapData, getOdosAmountOut, getEmptyOdosData} = require("@overnight-contracts/common/utils/odos-helper");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
-const hre = require('hardhat');
 let zeroAddress = "0x0000000000000000000000000000000000000000";
 let odosEmptyData = {
     inputTokenAddress: zeroAddress,
     outputTokenAddress: zeroAddress,
     amountIn: 0,
-    data: ethers.utils.formatBytes32String("")
+    data: hre.ethers.encodeBytes32String("")
 }
 
 
@@ -38,7 +34,7 @@ async function main() {
     let exchange = await getContract('Exchange');
     let typePayout = getTypePayout();
 
-    if (hre.network.name === 'localhost'){
+    if (process.env.network === 'localhost') {
         await transferETH(1, await getWalletAddress());
     } 
 
@@ -59,16 +55,16 @@ async function main() {
     let gasLimit 
     try {
         if (typePayout === TypePayout.INSURANCE || typePayout === TypePayout.ODOS_EXIST) {
-            gasLimit = await exchange.estimateGas.payout(false, odosParams);
+            gasLimit = await exchange.payout.estimateGas(false, odosParams);
         } else {
-            gasLimit = await exchange.estimateGas.payout();
+            gasLimit = await exchange.payout.estimateGas();
         }
         console.log("Test success");
     } catch (e) {
         console.log(e)
         return;
     }
-    gasLimit = gasLimit.mul(150).div(100)
+    gasLimit = gasLimit * 150n / 100n;
     let tx;
     if (typePayout === TypePayout.INSURANCE || typePayout === TypePayout.ODOS_EXIST) {
         tx = await (await exchange.payout(false, odosParams, {...(await getPrice()), gasLimit}  )).wait();
@@ -77,7 +73,7 @@ async function main() {
     }
     console.log("Payout success");
 
-    await showPayoutData(tx, exchange);
+    await showPayoutEvent(tx, exchange);
 
     await showM2M();  
 
@@ -85,7 +81,7 @@ async function main() {
 
 
 function getTypePayout() {
-    let stand = process.env.STAND;
+    let stand = process.env.stand;
 
     if (stand === "optimism" || stand === 'arbitrum' || stand === 'arbitrum_usdt') {
         return TypePayout.INSURANCE;
@@ -110,15 +106,19 @@ async function getOdosParams(exchange) {
     // 1. simulate payout, get loss or premium
     // This block of code is needed in order to find out in advance what amount of compensation or premium will be during the payout.
     // This information is needed to receive a route from Odos since Odos cannot generate data with dynamic substitution of volumes.
-    let asset = await ethers.getContractAt("IERC20", await exchange.usdc());
+    let asset = await hre.ethers.getContractAt("IERC20", await exchange.usdc());
     let ovn = await getContract('Ovn');
-    let insurance = await ethers.getContract("InsuranceExchange");
+    let insurance = await getContract("InsuranceExchange");
 
+    ovn.address = ovn.target;
+    insurance.address = insurance.target;
+    console.log(1, ovn.address)
     console.log("ovnBefore", (await ovn.balanceOf(insurance.address)).toString());
+    console.log(2)
     console.log("usdcBefore", (await asset.balanceOf(insurance.address)).toString());
 
     let odosSwapData = odosEmptyData;
-    let swapAmount = await exchange.callStatic.payout(true, odosEmptyData);
+    let swapAmount = await exchange.payout.staticCall(true, odosEmptyData);
     console.log("[getOdosParams] SwapAmount", swapAmount.toString());
     swapAmount = Number.parseInt(swapAmount.toString());
     // 2.1. if premium then generates data to swap usdc to ovn
@@ -147,15 +147,6 @@ async function getOdosParams(exchange) {
     return odosSwapData;
 
 }
-
-async function showPayoutData(tx, exchange) {
-
-    await showPayoutEvent(tx, exchange);
- /*    await showRewardsFromPayout(tx);
-    await showPoolOperationsFromPayout(tx);
-    await showProfitOnRewardWallet(tx); */
-}
-
 
 main()
     .then(() => process.exit(0))

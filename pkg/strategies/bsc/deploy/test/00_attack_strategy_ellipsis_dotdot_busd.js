@@ -1,6 +1,7 @@
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const {deploySection, settingSection} = require("@overnight-contracts/common/utils/script-utils");
 const {BSC} = require("@overnight-contracts/common/utils/assets");
+const hre = require("hardhat");
 
 let val3EPS = '0x5b5bD8913D766D005859CE002533D4838B0Ebbb5';
 let pool = '0x19EC9e3F7B21dd27598E7ad5aAe7dC0Db00A806d';
@@ -16,7 +17,7 @@ module.exports = async ({deployments}) => {
         log: true,
     });
 
-    const attackContract = await ethers.getContract("AttackStrategyEllipsisDotDotBusd");
+    const attackContract = await hre.ethers.getContract("AttackStrategyEllipsisDotDotBusd");
 
     await (await attackContract.setParams(
         {

@@ -11,7 +11,6 @@ const {ARBITRUM} = require("@overnight-contracts/common/utils/assets");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {prepareEnvironment} = require("@overnight-contracts/common/utils/tests");
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
-const {ethers} = require("hardhat");
 
 async function main() {
 

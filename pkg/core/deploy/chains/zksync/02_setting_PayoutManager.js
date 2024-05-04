@@ -1,9 +1,5 @@
-const { ethers } = require("hardhat");
 let { BSC, COMMON } = require("@overnight-contracts/common/utils/assets");
-const {
-    getContract,
-    getPrice,
-} = require("@overnight-contracts/common/utils/script-utils");
+const { getContract, getPrice } = require("@overnight-contracts/common/utils/script-utils");
 const {
     createSkim,
     createBribe,

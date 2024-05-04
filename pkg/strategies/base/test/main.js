@@ -22,7 +22,7 @@ describe("BASE", function () {
     console.log(`Strategy ID ${params.name}`);
 
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'base_dai':
             strategyTest(params, 'BASE', 'dai', runStrategyLogic);
             break;

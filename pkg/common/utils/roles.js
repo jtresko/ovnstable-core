@@ -9,5 +9,4 @@ class Roles {
     static get EXCHANGER() { return '0x3eb675f159e6ca6cf5de6bfbbc8c4521cfd428f5e9166e51094d5898504caf2d'; }
 }
 
-
 module.exports.Roles = Roles;

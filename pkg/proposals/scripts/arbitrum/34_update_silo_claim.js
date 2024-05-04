@@ -1,4 +1,4 @@
-const hre = require('hardhat')
+const hre = require("hardhat");
 const { getContract, showM2M, execTimelock } = require('@overnight-contracts/common/utils/script-utils')
 const {
   createProposal,

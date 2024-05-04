@@ -4,11 +4,9 @@ const {
     getPrice,
     execTimelock,
     initWallet,
-    convertWeights,
     showM2M, transferETH, getERC20ByAddress, transferAsset
 } = require("@overnight-contracts/common/utils/script-utils");
 const hre = require("hardhat");
-const {ethers, upgrades, getNamedAccounts} = require("hardhat");
 const sampleModule = require("@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {getImplementationAddress} = require("@openzeppelin/upgrades-core");

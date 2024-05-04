@@ -5,7 +5,9 @@ const { deploySection, settingSection, transferETH, getWalletAddress } = require
 module.exports = async ({ deployments }) => {
     const { save } = deployments;
 
-    if ( hre.network.name === 'localhost') await transferETH(1, await getWalletAddress());
+    if (process.env.network === "localhost") {
+        await transferETH(1, await getWalletAddress());
+    }
      
     await deploySection(async (name) => {
         await deployProxy(name, deployments, save);

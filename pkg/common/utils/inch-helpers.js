@@ -1,13 +1,14 @@
 const { default: axios } = require("axios");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const {execTimelock} = require("./script-utils");
 const {Roles} = require("./roles");
 const { getContract, getWalletAddress, getChainId, sleep } = require("./script-utils");
 const INCH_ROUTER_V5 = require("@overnight-contracts/core/test/abi/InchRouterV5.json");
 const { ZERO_ADDRESS } = require("@openzeppelin/test-helpers/src/constants");
 
-async function inchSwapperUpdatePath(token0, token1, amountToken0, stand = process.env.STAND) {
+async function inchSwapperUpdatePath(token0, token1, amountToken0) {
 
+    let stand = process.env.standtoken;
     let inchSwapper = await getContract('InchSwapper', stand);
     let roleManager = await getContract('RoleManager', stand);
 
@@ -122,7 +123,7 @@ function getArgs(transaction) {
     let decodedData;
     try {
 
-        let iface = new ethers.utils.Interface(INCH_ROUTER_V5);
+        let iface = new hre.ethers.utils.Interface(INCH_ROUTER_V5);
 
         decodedData = iface.parseTransaction({ data: transaction.data.tx.data, value: transaction.data.tx.value });
     } catch (e) {

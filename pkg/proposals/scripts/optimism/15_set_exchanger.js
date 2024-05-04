@@ -6,7 +6,6 @@ const {Roles} = require("@overnight-contracts/common/utils/roles");
 const path = require('path');
 const {prepareEnvironment} = require("@overnight-contracts/common/utils/tests");
 const {strategySiloUsdc} = require("@overnight-contracts/strategies-arbitrum/deploy/38_strategy_silo_usdc");
-const {ethers} = require("hardhat");
 const {OPTIMISM} = require("@overnight-contracts/common/utils/assets");
 let filename = path.basename(__filename);
 filename = filename.substring(0, filename.indexOf(".js"));
@@ -58,7 +57,7 @@ async function main() {
     abis.push(betaOp.interface.encodeFunctionData('setParams', [betaOpParams]));
 
 
-    let exchanger = await ethers.getContractAt([EXCHANGER_ABI], betaOpParams.hedgeExchanger, await initWallet());
+    let exchanger = await hre.ethers.getContractAt([EXCHANGER_ABI], betaOpParams.hedgeExchanger, await initWallet());
 
     addresses.push(exchanger.address);
     values.push(0);

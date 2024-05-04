@@ -2,8 +2,7 @@ const {BSC} = require('@overnight-contracts/common/utils/assets');
 const {strategyTest} = require('@overnight-contracts/common/utils/strategy-test');
 const {getContract, transferETH} = require("@overnight-contracts/common/utils/script-utils");
 const {impersonatingEtsGrantRole} = require("@overnight-contracts/common/utils/tests");
-const hre = require('hardhat');
-const ethers = hre.ethers;
+const hre = require("hardhat");
 
 const HedgeExchanger = require("./abi/ets/HedgeExchanger.json");
 const {Wallets} = require("@overnight-contracts/common/utils/wallets");
@@ -34,7 +33,7 @@ describe("BSC", function () {
 
     console.log(`Strategy ID ${params.name}`);
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case "bsc_usdt":
             strategyTest(params, 'BSC', 'usdt', runStrategyLogic);
             break;

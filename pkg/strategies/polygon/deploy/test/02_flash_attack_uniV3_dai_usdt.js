@@ -1,5 +1,5 @@
 const {POLYGON} = require('@overnight-contracts/common/utils/assets');
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 
 module.exports = async ({deployments}) => {
@@ -12,7 +12,7 @@ module.exports = async ({deployments}) => {
         log: true,
     });
 
-    const attackContract = await ethers.getContract("FlashAttackUniV3DaiUsdt");
+    const attackContract = await hre.ethers.getContract("FlashAttackUniV3DaiUsdt");
 
     await (await attackContract.setParams(
         {

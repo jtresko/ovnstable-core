@@ -1,13 +1,14 @@
+const hre = require("hardhat");
 const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { transferETH, getWalletAddress } = require("@overnight-contracts/common/utils/script-utils");
-const hre = require("hardhat");
-const { ethers } = require("hardhat");
 
 module.exports = async ({ deployments }) => {
     const { save } = deployments;
-    if (hre.network.name === "localhost") await transferETH(1, await getWalletAddress());
+    if (process.env.network === "localhost") {
+        await transferETH(1, await getWalletAddress());
+    }
     let params;
-    switch (hre.ovn.stand || process.env.STAND) {
+    switch (process.env.standtoken) {
         case "optimism_dai":
         case "arbitrum_dai":
         case "base_dai":
@@ -38,7 +39,7 @@ module.exports = async ({ deployments }) => {
     }
     await deployProxy("UsdPlusToken", deployments, save, params);
 
-    let usdPlus = await ethers.getContract("UsdPlusToken");
+    let usdPlus = await hre.ethers.getContract("UsdPlusToken");
 
     console.log("UsdPlusToken deploy done()");
     console.log("Symbol:      " + (await usdPlus.symbol()));

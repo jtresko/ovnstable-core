@@ -1,7 +1,6 @@
 const {expect} = require("chai");
 const {utils, BigNumber} = require("ethers");
-const hre = require('hardhat');
-const {getNamedAccounts, deployments, ethers} = require("hardhat");
+const hre = require("hardhat");
 const {createRandomWallet} = require("@overnight-contracts/common/utils/tests");
 const expectRevert = require("@overnight-contracts/common/utils/expectRevert");
 const {fromE18, fromE6, toE18, toE6} = require("@overnight-contracts/common/utils/decimals");
@@ -27,7 +26,7 @@ describe("Token", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(["UsdPlusToken"]);
+        await hre.deployments.fixture(["UsdPlusToken"]);
 
         const {deployer} = await getNamedAccounts();
         account = deployer;
@@ -36,7 +35,7 @@ describe("Token", function () {
         user3 = await createRandomWallet();
         nonRebaseUser1 = await createRandomWallet();
         nonRebaseUser2 = await createRandomWallet();
-        usdPlus = await ethers.getContract("UsdPlusToken");
+        usdPlus = await hre.ethers.getContract("UsdPlusToken");
         await usdPlus.setExchanger(account);
         await usdPlus.setPayoutManager(account);
 

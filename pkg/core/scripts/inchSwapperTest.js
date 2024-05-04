@@ -1,10 +1,9 @@
-const { getContract, getPrice, showM2M, getChainId, initWallet, getERC20ByAddress, getERC20, transferAsset, transferETH } = require("@overnight-contracts/common/utils/script-utils");
+const { getContract, getPrice, showM2M, getChainId, initWallet, getERC20, transferAsset, transferETH } = require("@overnight-contracts/common/utils/script-utils");
 const { createProposal, testProposal } = require("@overnight-contracts/common/utils/governance");
 const { ARBITRUM, BASE } = require("@overnight-contracts/common/utils/assets");
 const { toE6, toE18 } = require("@overnight-contracts/common/utils/decimals");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const { getDataForSwap } = require("@overnight-contracts/common/utils/inch-helpers");
-const { getNamedAccounts } = require("hardhat");
 
 async function main() {
 

@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require("hardhat");
 const BN = require("bn.js");
 const {constants} = require('@openzeppelin/test-helpers');
 const {ZERO_ADDRESS} = constants;
@@ -20,13 +19,13 @@ describe("WrappedUsdPlusRateProvider", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(['MockUsdPlusToken', 'WrappedUsdPlusTokenForTest']);
+        await hre.deployments.fixture(['MockUsdPlusToken', 'WrappedUsdPlusTokenForTest']);
 
         const {deployer} = await getNamedAccounts();
         account = deployer;
 
-        usdPlus = await ethers.getContract("MockUsdPlusToken");
-        wrappedUsdPlus = await ethers.getContract("WrappedUsdPlusToken");
+        usdPlus = await hre.ethers.getContract("MockUsdPlusToken");
+        wrappedUsdPlus = await hre.ethers.getContract("WrappedUsdPlusToken");
 
         await deployments.deploy('WrappedUsdPlusRateProvider', {
             from: deployer,
@@ -34,7 +33,7 @@ describe("WrappedUsdPlusRateProvider", function () {
             log: true,
         });
 
-        rateProvider = await ethers.getContract('WrappedUsdPlusRateProvider');
+        rateProvider = await hre.ethers.getContract('WrappedUsdPlusRateProvider');
 
         await usdPlus.setExchanger(account);
     });

@@ -1,5 +1,4 @@
 const hre = require("hardhat");
-const { deployments, getNamedAccounts, ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
 const { expect } = require("chai");
 const chai = require("chai");
@@ -184,8 +183,8 @@ function stakeUnstake(strategyParams, network, assetName, values, runStrategyLog
 
                         if (strategyParams.unstakeDelay) {
                             let delay = strategyParams.unstakeDelay;
-                            await ethers.provider.send("evm_increaseTime", [delay]);
-                            await ethers.provider.send('evm_mine');
+                            await hre.ethers.provider.send("evm_increaseTime", [delay]);
+                            await hre.ethers.provider.send('evm_mine');
                         }
 
                         let balanceAssetBefore = new BigNumber((await asset.balanceOf(recipient.address)).toString());
@@ -289,8 +288,8 @@ function unstakeFull(strategyParams, network, assetName, values, runStrategyLogi
 
                     if (strategyParams.unstakeDelay) {
                         let delay = strategyParams.unstakeDelay;
-                        await ethers.provider.send("evm_increaseTime", [delay]);
-                        await ethers.provider.send('evm_mine');
+                        await hre.ethers.provider.send("evm_increaseTime", [delay]);
+                        await hre.ethers.provider.send('evm_mine');
                     }
 
                     let tx = await (await strategy.connect(recipient).unstake(asset.address, 0, recipient.address, true)).wait();
@@ -391,8 +390,8 @@ function claimRewards(strategyParams, network, assetName, values, runStrategyLog
                     } else {
                         delay = 7 * 24 * 60 * 60 * 1000;
                     }
-                    await ethers.provider.send("evm_increaseTime", [delay]);
-                    await ethers.provider.send('evm_mine');
+                    await hre.ethers.provider.send("evm_increaseTime", [delay]);
+                    await hre.ethers.provider.send('evm_mine');
 
                     if (strategyParams.doubleStakeReward) {
                         await asset.transfer(recipient.address, assetValue);
@@ -415,7 +414,7 @@ function claimRewards(strategyParams, network, assetName, values, runStrategyLog
                 });
 
                 it(`Rewards > 0`, async function () {
-                    expect(balanceAsset.toNumber()).to.greaterThan(0);
+                    expect(Number(balanceAsset).to.greaterThan(0);
                 });
 
                 it(`Free asset is in range`, async function () {
@@ -489,8 +488,8 @@ function claimRewards(strategyParams, network, assetName, values, runStrategyLog
                         } else {
                             delay = 7 * 24 * 60 * 60 * 1000;
                         }
-                        await ethers.provider.send("evm_increaseTime", [delay]);
-                        await ethers.provider.send('evm_mine');
+                        await hre.ethers.provider.send("evm_increaseTime", [delay]);
+                        await hre.ethers.provider.send('evm_mine');
 
                         await strategy.connect(recipient).claimRewards(recipient.address);
 
@@ -509,7 +508,7 @@ function claimRewards(strategyParams, network, assetName, values, runStrategyLog
 
                     it(`Balance asset after double farm 1.2 times greater than balance asset after single farm`, async function () {
                         if (balanceAssetDoubleFarm > 0) {
-                            expect(balanceAssetDoubleFarm.toNumber()).to.greaterThan(balanceAsset.times(new BigNumber(1.2)).toNumber());
+                            expect(Number(balanceAssetDoubleFarm)).to.greaterThan(Number(balanceAsset.times(new BigNumber(1.2))));
                         }
                     });
 
@@ -538,12 +537,12 @@ async function setUp(network, strategyParams, assetName, runStrategyLogic) {
     }
 
     let strategyName = strategyParams.name;
-    await deployments.fixture([strategyName]);
+    await hre.deployments.fixture([strategyName]);
 
-    const signers = await ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     const recipient = signers[1];
 
-    const strategy = await ethers.getContract(strategyName);
+    const strategy = await hre.ethers.getContract(strategyName);
     await strategy.setStrategyParams(recipient.address, recipient.address);
 
 

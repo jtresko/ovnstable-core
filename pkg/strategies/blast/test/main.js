@@ -22,7 +22,7 @@ describe("BLAST", function () {
     console.log(`Strategy ID ${params.name}`);
 
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'blast':
             strategyTest(params, 'BLAST', 'usdb', runStrategyLogic);
             break;

@@ -1,17 +1,12 @@
 const {expect} = require("chai");
 const chai = require("chai");
-const {deployments, ethers, getNamedAccounts} = require("hardhat");
 const BN = require("bn.js");
 const {constants} = require('@openzeppelin/test-helpers');
 const {ZERO_ADDRESS} = constants;
-const {logGas} = require("@overnight-contracts/common/utils/gas");
-
 const hre = require("hardhat");
 const expectRevert = require("@overnight-contracts/common/utils/expectRevert");
 const {toE6, fromE6} = require("@overnight-contracts/common/utils/decimals");
-
 const {sharedBeforeEach} = require("@overnight-contracts/common/utils/sharedBeforeEach");
-
 
 // Copy from USD+ tests
 
@@ -25,11 +20,11 @@ describe("Liquidity Index", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(["RebaseToken"]);
+        await hre.deployments.fixture(["RebaseToken"]);
 
         const {deployer} = await getNamedAccounts();
         account = deployer;
-        rebase = await ethers.getContract("RebaseToken");
+        rebase = await hre.ethers.getContract("RebaseToken");
         await rebase.setExchanger(account);
     });
 
@@ -39,7 +34,7 @@ describe("Liquidity Index", function () {
         let newLiquidityIndex = new BN(10).pow(new BN(27)); // 10^27
         await rebase.setLiquidityIndex(newLiquidityIndex.toString());
 
-        await logGas(rebase.mint(account, 1), "RebaseToken", "mint");
+        await rebase.mint(account, 1);
 
         let scaledBalance = await rebase.scaledBalanceOf(account);
         console.log("ScaledBalance rebase: " + scaledBalance);
@@ -296,7 +291,7 @@ describe("Liquidity Index", function () {
     });
 
     it("Token transfer", async function () {
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         let firstLiquidityIndex = new BN(10).pow(new BN(27)).divn(2); // 5*10^26
         await rebase.setLiquidityIndex(firstLiquidityIndex.toString());
@@ -316,7 +311,7 @@ describe("Liquidity Index", function () {
     });
 
     it("Token transferFrom", async function () {
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         let newLiquidityIndex = new BN("1022809482605723771055655202");
         await rebase.setLiquidityIndex(newLiquidityIndex.toString());
@@ -353,7 +348,7 @@ describe("Liquidity Index", function () {
 
     it("Token approve", async function () {
 
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         let newLiquidityIndex = new BN("1022809482605723771055655202");
         await rebase.setLiquidityIndex(newLiquidityIndex.toString());
@@ -382,11 +377,11 @@ describe("Total Mint/Burn/Supply", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(["RebaseToken"]);
+        await hre.deployments.fixture(["RebaseToken"]);
 
         const {deployer} = await getNamedAccounts();
         account = deployer;
-        rebase = await ethers.getContract("RebaseToken");
+        rebase = await hre.ethers.getContract("RebaseToken");
         await rebase.setExchanger(account);
     });
 
@@ -450,16 +445,16 @@ describe("ERC20", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(["RebaseToken"]);
+        await hre.deployments.fixture(["RebaseToken"]);
 
         const accounts = await getNamedAccounts();
         account = accounts.deployer;
-        rebase = await ethers.getContract("RebaseToken");
+        rebase = await hre.ethers.getContract("RebaseToken");
         await rebase.setExchanger(account);
 
         await rebase.setName('LP USD+/WMATIC', 'USD+/WMATIC')
 
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         recipient = tmpUser;
     });
@@ -497,7 +492,7 @@ describe("ERC20", function () {
         });
 
         it('amount exceeds allowance', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             await rebase.mint(account, 50);
             await expectRevert(rebase.connect(tmpUser).transferFrom(account, tmpUser.address, 50),
@@ -510,7 +505,7 @@ describe("ERC20", function () {
     describe("approve", function () {
 
         it('max 256', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             let uint256Max = new BN(2).pow(new BN(256)).subn(1);
             await rebase.approve(tmpUser.address, uint256Max.toString());
@@ -519,7 +514,7 @@ describe("ERC20", function () {
         });
 
         it('max 75 symbols', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             let uint256Max = new BN(2).pow(new BN(256)).subn(1);
             await rebase.approve(tmpUser.address, "115792089237316195423570985008687907853269984665640564039457584007913129");
@@ -529,7 +524,7 @@ describe("ERC20", function () {
 
 
         it('max 40 symbols', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             let value = "1157920892373161954235709850086879078532";
             await rebase.approve(tmpUser.address, value);
@@ -539,7 +534,7 @@ describe("ERC20", function () {
 
 
         it('transfer', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             await rebase.mint(account, 50);
             await rebase.approve(tmpUser.address, 50);
@@ -554,7 +549,7 @@ describe("ERC20", function () {
         });
 
         it('increaseAllowance', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             await rebase.mint(account, 50);
             await rebase.increaseAllowance(tmpUser.address, 25);
@@ -570,7 +565,7 @@ describe("ERC20", function () {
         });
 
         it('decreaseAllowance', async function () {
-            const [owner, tmpUser] = await ethers.getSigners();
+            const [owner, tmpUser] = await hre.ethers.getSigners();
 
             await rebase.mint(account, 50);
             await rebase.increaseAllowance(tmpUser.address, 75);

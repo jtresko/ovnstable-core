@@ -7,7 +7,7 @@ const ReaperSonneUsdc = require("./abi/reaper/ReaperSonneUsdc.json");
 const ReaperSonneDai = require("./abi/reaper/ReaperSonneDai.json");
 const ReaperSonneUsdt = require("./abi/reaper/ReaperSonneUsdt.json");
 const HedgeExchanger = require("./abi/ets/HedgeExchanger.json");
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 const {Wallets} = require("@overnight-contracts/common/utils/wallets");
 
 async function runStrategyLogic(strategyName, strategyAddress) {
@@ -25,14 +25,14 @@ async function runStrategyLogic(strategyName, strategyAddress) {
             params: [governanceAddress],
         });
 
-        const governance = await ethers.getSigner(governanceAddress);
+        const governance = await hre.ethers.getSigner(governanceAddress);
         let reaperSonne;
         if (strategyName == 'StrategyReaperSonneUsdc') {
-            reaperSonne = await ethers.getContractAt(ReaperSonneUsdc, "0x566c68Cd2f1e8b6D780c342B207B60c9c4f32767");
+            reaperSonne = await hre.ethers.getContractAt(ReaperSonneUsdc, "0x566c68Cd2f1e8b6D780c342B207B60c9c4f32767");
         } else if (strategyName == 'StrategyReaperSonneDai' || strategyName == 'StrategyReaperSonneDaiDai') {
-            reaperSonne = await ethers.getContractAt(ReaperSonneDai, "0x071A922d81d604617AD5276479146bF9d7105EFC");
+            reaperSonne = await hre.ethers.getContractAt(ReaperSonneDai, "0x071A922d81d604617AD5276479146bF9d7105EFC");
         } else if (strategyName == 'StrategyReaperSonneUsdt') {
-            reaperSonne = await ethers.getContractAt(ReaperSonneUsdt, "0xcF14ef7C69166847c71913dc449c3958F55998d7");
+            reaperSonne = await hre.ethers.getContractAt(ReaperSonneUsdt, "0xcF14ef7C69166847c71913dc449c3958F55998d7");
         }
         await reaperSonne.connect(governance).updateSecurityFee(0);
 
@@ -57,7 +57,7 @@ describe("OPTIMISM", function () {
         params.unstakeDelay = 4 * 24 * 60 * 60 * 1000;
     }
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'optimism_dai':
             strategyTest(params, 'OPTIMISM', 'dai', runStrategyLogic);
             break;

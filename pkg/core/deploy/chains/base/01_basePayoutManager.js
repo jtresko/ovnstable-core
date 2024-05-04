@@ -1,9 +1,8 @@
+const hre = require("hardhat");
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
-const {ethers} = require("hardhat");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {getContract, getWalletAddress} = require("@overnight-contracts/common/utils/script-utils");
 const {COMMON} = require("@overnight-contracts/common/utils/assets");
-const hre = require("hardhat");
 
 module.exports = async ({deployments}) => {
     const {save} = deployments;
@@ -11,8 +10,8 @@ module.exports = async ({deployments}) => {
 
     if (hre.ovn && hre.ovn.setting){
 
-        let roleManager = await ethers.getContract('RoleManager');
-        let payoutManager = await ethers.getContract('BasePayoutManager');
+        let roleManager = await hre.ethers.getContract('RoleManager');
+        let payoutManager = await hre.ethers.getContract('BasePayoutManager');
 
         await (await payoutManager.connect.setRoleManager(roleManager.address)).wait();
         await (await payoutManager.setRewardWallet(COMMON.rewardWallet)).wait();

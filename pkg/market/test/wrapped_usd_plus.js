@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require("hardhat");
 const BN = require("bn.js");
 const {constants} = require('@openzeppelin/test-helpers');
 const {ZERO_ADDRESS} = constants;
@@ -21,13 +20,13 @@ describe("WrappedUsdPlusToken", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(['test', 'test_setting']);
+        await hre.deployments.fixture(['test', 'test_setting']);
 
         const {deployer} = await getNamedAccounts();
         account = deployer;
 
-        usdPlus = await ethers.getContract("MockUsdPlusToken");
-        wrappedUsdPlus = await ethers.getContract("WrappedUsdPlusToken");
+        usdPlus = await hre.ethers.getContract("MockUsdPlusToken");
+        wrappedUsdPlus = await hre.ethers.getContract("WrappedUsdPlusToken");
         await usdPlus.setExchanger(account);
     });
 
@@ -382,7 +381,7 @@ describe("WrappedUsdPlusToken", function () {
     });
 
     it("redeem another owner", async function () {
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         let usdcAmountToDeposit = 250;
         await expectRevert(
@@ -584,7 +583,7 @@ describe("WrappedUsdPlusToken", function () {
     });
 
     it("withdraw another owner", async function () {
-        const [owner, tmpUser] = await ethers.getSigners();
+        const [owner, tmpUser] = await hre.ethers.getSigners();
 
         let usdcAmountToMint = 250;
         let sharesToMint = await wrappedUsdPlus.convertToShares(usdcAmountToMint);

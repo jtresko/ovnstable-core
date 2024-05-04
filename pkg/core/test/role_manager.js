@@ -3,7 +3,6 @@ const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {expect} = require("chai");
 const hre = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
-const {getNamedAccounts, deployments, ethers} = require("hardhat");
 const {ARBITRUM} = require("@overnight-contracts/common/utils/assets");
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 
@@ -23,8 +22,8 @@ describe("RoleManager", function () {
         testAccount = await createRandomWallet();
 
 
-        await deployments.fixture(['RoleManager']);
-        roleManager = await ethers.getContract('RoleManager');
+        await hre.deployments.fixture(['RoleManager']);
+        roleManager = await hre.ethers.getContract('RoleManager');
     });
 
     describe("PortfolioManager: role", function () {

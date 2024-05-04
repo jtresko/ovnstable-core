@@ -1,10 +1,9 @@
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
 const {
     getContract,
     execTimelock,
-    initWallet, getWalletAddress, transferETH
+    initWallet, transferETH
 } = require("@overnight-contracts/common/utils/script-utils");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 
@@ -16,9 +15,9 @@ module.exports = async ({deployments}) => {
 
     let params = {args: ["USD+", "USD+", 6]};
 
-    let usdPlus = (await ethers.getContract('UsdPlusToken')).connect(wallet);
-    let userAddress = await new ethers.Wallet("a37ea11312df3f092e2bddff022a22002c8f0d2f7c45ba3122fcec151fee6dac", ethers.provider);
-    let userAddress2 = await new ethers.Wallet("0dffa9d44e4269e7da3fb9dfeae8167102bfce1885ef06a017005d7e64d692a4", ethers.provider);
+    let usdPlus = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
+    let userAddress = await new hre.ethers.Wallet("a37ea11312df3f092e2bddff022a22002c8f0d2f7c45ba3122fcec151fee6dac", hre.ethers.provider);
+    let userAddress2 = await new hre.ethers.Wallet("0dffa9d44e4269e7da3fb9dfeae8167102bfce1885ef06a017005d7e64d692a4", hre.ethers.provider);
     await transferETH(1, userAddress.address);
     await transferETH(1, userAddress2.address);
 
@@ -30,10 +29,10 @@ module.exports = async ({deployments}) => {
 
     await deployProxy('UsdPlusToken', deployments, save, params);
 
-    let usdPlus2 = (await ethers.getContract('UsdPlusToken')).connect(wallet);
-    let usdPlus2ua = (await ethers.getContract('UsdPlusToken')).connect(userAddress);
-    let usdPlus2ua2 = (await ethers.getContract('UsdPlusToken')).connect(userAddress2);
-    let roleManager = await ethers.getContract('RoleManager');
+    let usdPlus2 = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
+    let usdPlus2ua = (await hre.ethers.getContract('UsdPlusToken')).connect(userAddress);
+    let usdPlus2ua2 = (await hre.ethers.getContract('UsdPlusToken')).connect(userAddress2);
+    let roleManager = await hre.ethers.getContract('RoleManager');
     // await (await usdPlus2.fix()).wait();
 
     let balance = await usdPlus.balanceOf(userAddress.address);

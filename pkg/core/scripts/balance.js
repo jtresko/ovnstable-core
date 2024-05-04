@@ -1,6 +1,5 @@
 const hre = require("hardhat");
 const fs = require("fs");
-
 const {showM2M, getContract, execTimelock, initWallet, transferAsset} = require("@overnight-contracts/common/utils/script-utils");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {OPTIMISM} = require("@overnight-contracts/common/utils/assets");
@@ -20,7 +19,6 @@ async function main() {
         await roleManager.connect(timelock).grantRole(Roles.PORTFOLIO_AGENT_ROLE, wallet.address);
         await strategy.connect(timelock).setStrategyParams(pm.address, roleManager.address);
     });
-
 
     await strategy.setSlippages(4, 1000, 4);
     await transferAsset(OPTIMISM.usdc, pm.address, toAsset(38800));

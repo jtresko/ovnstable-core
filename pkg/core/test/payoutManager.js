@@ -1,6 +1,5 @@
 const {expect} = require("chai");
 const chai = require("chai");
-const {deployments, ethers, getNamedAccounts, upgrades} = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
 const hre = require("hardhat");
 const {constants} = require("@openzeppelin/test-helpers");
@@ -13,12 +12,10 @@ chai.use(require('chai-bignumber')());
 const {solidity} = require("ethereum-waffle");
 chai.use(solidity);
 
-const {waffle} = require("hardhat");
 const {transferETH} = require("@overnight-contracts/common/utils/script-utils");
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const {fromE6, toE6} = require("@overnight-contracts/common/utils/decimals");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
-const {provider} = waffle;
 
 
 const OPERATIONS = {
@@ -41,12 +38,12 @@ describe("PayoutManager", function () {
         await hre.run("compile");
         const {deployer} = await getNamedAccounts();
 
-        await deployments.fixture(['DefaultPayoutManager']);
+        await hre.deployments.fixture(['DefaultPayoutManager']);
 
-        pm = await ethers.getContract('DefaultPayoutManager');
-        mockToken = await ethers.getContract('MockERC20');
-        mockPool = await ethers.getContract('MockPool');
-        mockBribe = await ethers.getContract('MockBribe');
+        pm = await hre.ethers.getContract('DefaultPayoutManager');
+        mockToken = await hre.ethers.getContract('MockERC20');
+        mockPool = await hre.ethers.getContract('MockPool');
+        mockBribe = await hre.ethers.getContract('MockBribe');
         testAccount = await createRandomWallet();
 
         await mockPool.setToken(mockToken.address);

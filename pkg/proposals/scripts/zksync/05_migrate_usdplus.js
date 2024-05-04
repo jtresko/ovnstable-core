@@ -4,7 +4,6 @@ const { createProposal, testProposal, testUsdPlus, testStrategy } = require("@ov
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const path = require("path");
 const { prepareEnvironment } = require("@overnight-contracts/common/utils/tests");
-const { ethers } = require("hardhat");
 let filename = path.basename(__filename);
 filename = filename.substring(0, filename.indexOf(".js"));
 
@@ -77,8 +76,8 @@ async function main() {
     let exchange = await getContract("Exchange", "zksync");
     let usdPlus = await getContract("UsdPlusToken", "zksync");
     const timelock = "0xD09ea5E276a84Fa73AE14Ae794524558d43F7fdC";
-    let exContract = new ethers.Contract(exchange.address, exMethodsAbi, ethers.provider.getSigner(timelock));
-    let migContract = new ethers.Contract(usdPlus.address, migMethodsAbi, ethers.provider.getSigner(timelock));
+    let exContract = new hre.ethers.Contract(exchange.address, exMethodsAbi,await hre.ethers.provider.getSigner(timelock));
+    let migContract = new hre.ethers.Contract(usdPlus.address, migMethodsAbi,await hre.ethers.provider.getSigner(timelock));
     let decimals = await usdPlus.decimals();
 
     let usdPlusMigrationAddress = "0xF42C374b76480D05907a60Abd3174F66789D609F";

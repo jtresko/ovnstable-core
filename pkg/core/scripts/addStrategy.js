@@ -1,4 +1,4 @@
-const {getContract, getPrice, showM2M, convertWeights} = require("@overnight-contracts/common/utils/script-utils");
+const {getContract, getPrice, showM2M} = require("@overnight-contracts/common/utils/script-utils");
 const {createProposal, testProposal} = require("@overnight-contracts/common/utils/governance");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {Wallets} = require("@overnight-contracts/common/utils/wallets");

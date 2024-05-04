@@ -1,10 +1,8 @@
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 const {COMMON} = require("./assets");
 const {ethers} = require("hardhat");
-
 const PayoutListenerABI = require("./abi/PayoutListener.json");
-const {Interface} = require("ethers/lib/utils");
-
+const {Interface} = require("ethers");
 
 const OPERATIONS = {
     SKIM : 0,
@@ -12,8 +10,6 @@ const OPERATIONS = {
     BRIBE : 2,
     CUSTOM : 3
 }
-
-
 
 function createSkim(pool, token, poolName, dexName){
 

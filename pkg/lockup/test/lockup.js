@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers} = require("hardhat");
 const hre = require("hardhat");
 const {sharedBeforeEach} = require("@overnight-contracts/common/utils/sharedBeforeEach");
 const {toE18, toE6} = require("@overnight-contracts/common/utils/decimals");
@@ -23,16 +22,16 @@ describe("Lockup", function () {
     sharedBeforeEach('deploy and setup', async () => {
 
         await hre.run("compile");
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         account = signers[0];
         beneficiary = signers[1];
 
         console.log("account address:", account.address);
         console.log("beneficiary address:", beneficiary.address);
 
-        await deployments.fixture(['LockupToken']);
+        await hre.deployments.fixture(['LockupToken']);
 
-        lockupToken = await ethers.getContract("LockupToken");
+        lockupToken = await hre.ethers.getContract("LockupToken");
         startTimestamp = Math.floor((new Date().getTime()) / 1000) + addDays(1);
         durationSeconds = addDays(30);
 
@@ -42,7 +41,7 @@ describe("Lockup", function () {
             durationSeconds: durationSeconds,
         }
 
-        lockup = await deployments.deploy("Lockup", {
+        lockup = await hre.deployments.deploy("Lockup", {
             from: account.address,
             args: [
                 params
@@ -53,7 +52,7 @@ describe("Lockup", function () {
 
         console.log("Lockup created at " + lockup.address);
 
-        lockup = await ethers.getContractAt(LOCKUP_ABI, lockup.address);
+        lockup = await hre.ethers.getContractAt(LOCKUP_ABI, lockup.address);
     });
 
 
@@ -114,7 +113,7 @@ describe("Lockup", function () {
     }
 
     async function spendTime(value) {
-        await ethers.provider.send("evm_setNextBlockTimestamp", [value]);
+        await hre.ethers.provider.send("evm_setNextBlockTimestamp", [value]);
     }
 
 });

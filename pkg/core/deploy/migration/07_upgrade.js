@@ -4,18 +4,15 @@ const {
     getPrice,
     execTimelock,
     initWallet,
-    convertWeights,
-    showM2M, transferETH, getERC20ByAddress, transferAsset
+    showM2M, transferETH, transferAsset
 } = require("@overnight-contracts/common/utils/script-utils");
 const hre = require("hardhat");
-const {ethers, upgrades, getNamedAccounts} = require("hardhat");
 const sampleModule = require("@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {getImplementationAddress} = require("@openzeppelin/upgrades-core");
 const {sharedBeforeEach, evmCheckpoint, evmRestore} = require("@overnight-contracts/common/utils/sharedBeforeEach");
 const {fromAsset, toE6, toAsset} = require("@overnight-contracts/common/utils/decimals");
 const {testUsdPlus} = require("@overnight-contracts/common/utils/governance");
-const {BigNumber} = require("ethers");
 const {createRandomWallet, prepareEnvironment} = require("@overnight-contracts/common/utils/tests");
 const {ARBITRUM} = require("@overnight-contracts/common/utils/assets");
 const {getEmptyOdosData} = require("@overnight-contracts/common/utils/odos-helper");

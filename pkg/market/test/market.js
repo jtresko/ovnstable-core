@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require("hardhat");
 const BN = require("bn.js");
 const hre = require("hardhat");
 let {POLYGON} = require('@overnight-contracts/common/utils/assets');
@@ -21,17 +20,17 @@ describe("Market", function () {
         // need to run inside IDEA via node script running
         await hre.run("compile");
 
-        await deployments.fixture(['test', 'test_setting']);
+        await hre.deployments.fixture(['test', 'test_setting']);
 
-        const signers = await ethers.getSigners();
+        const signers = await hre.ethers.getSigners();
         account = signers[0];
         userAccount = signers[1];
 
-        usdPlus = await ethers.getContract("MockUsdPlusToken");
-        wrappedUsdPlus = await ethers.getContract("WrappedUsdPlusToken");
-        usdc = await ethers.getContractAt("IERC20", POLYGON.usdc);
-        market = await ethers.getContract("Market");
-        exchange = await ethers.getContract("MockExchange");
+        usdPlus = await hre.ethers.getContract("MockUsdPlusToken");
+        wrappedUsdPlus = await hre.ethers.getContract("WrappedUsdPlusToken");
+        usdc = await hre.ethers.getContractAt("IERC20", POLYGON.usdc);
+        market = await hre.ethers.getContract("Market");
+        exchange = await hre.ethers.getContract("MockExchange");
 
         await usdc.transfer(exchange.address, 1000000000000);
     });

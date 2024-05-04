@@ -1,6 +1,5 @@
 const BigNumber = require('bignumber.js');
 
-
 function toE18(value) {
     return new BigNumber(value.toString()).times(new BigNumber(10).pow(18)).toFixed(0)
 }
@@ -30,7 +29,10 @@ function fromE8(value) {
     return value / 10 ** 8;
 }
 
-function toAsset(value, stand = process.env.STAND) {
+function toAsset(value) {
+
+    let stand = process.env.standtoken;
+
     if (stand === 'bsc' ||
         stand === 'bsc_usdt' ||
         stand === 'optimism_dai' ||
@@ -45,21 +47,24 @@ function toAsset(value, stand = process.env.STAND) {
     }
 }
 
+function fromUsdPlus(value) {
 
-function fromUsdPlus(value, stand = process.env.STAND){
+    let stand = process.env.standtoken;
 
     let fromUsdPlus;
-    if (stand === "bsc"){
+    if (stand === "bsc") {
         fromUsdPlus = fromE6(value, stand);
     }else {
         fromUsdPlus = fromAsset(value, stand);
     }
 
     return fromUsdPlus;
-
 }
 
-function fromAsset(value, stand = process.env.STAND) {
+function fromAsset(value) {
+
+    let stand = process.env.standtoken;
+
     if (stand === 'bsc' ||
         stand === 'bsc_usdt' ||
         stand === 'optimism_dai' ||

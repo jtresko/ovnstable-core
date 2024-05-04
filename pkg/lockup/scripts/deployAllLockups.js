@@ -1,4 +1,3 @@
-const { ethers } = require('hardhat');
 const hre = require("hardhat");
 
 const DEV_ADDRESSES = {
@@ -48,7 +47,7 @@ async function main() {
             durationSeconds: durationSeconds,
         }
 
-        let Lockup = await ethers.getContractFactory('Lockup');
+        let Lockup = await hre.ethers.getContractFactory('Lockup');
         let lockup = await Lockup.deploy(params);
         console.log("Lockup for " + userAddress + " created at " + lockup.address);
 

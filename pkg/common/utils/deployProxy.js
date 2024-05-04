@@ -1,4 +1,3 @@
-const { ethers, upgrades } = require("hardhat");
 const hre = require("hardhat");
 const { getImplementationAddress } = require('@openzeppelin/upgrades-core');
 const sampleModule = require('@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl');
@@ -60,7 +59,7 @@ async function deployProxyZkSync(contractName, factoryName, deployments, save, p
 
     let proxy;
     try {
-        proxy = await ethers.getContract(contractName);
+        proxy = await hre.ethers.getContract(contractName);
     } catch (e) {
         console.log(`${contractName}: Proxy not found: ` + e);
         proxyExist = false;
@@ -142,23 +141,23 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
         args = params.args;
     }
 
-    const contractFactory = await ethers.getContractFactory(factoryName, factoryOptions);
+    const contractFactory = await hre.ethers.getContractFactory(factoryName, factoryOptions);
 
     // uncomment for force import
     //    let proxyAddress = '';
-    //    await upgrades.forceImport(proxyAddress, contractFactory, {
+    //    await hre.upgrades.forceImport(proxyAddress, contractFactory, {
     //        kind: 'uups',
     //    });
 
     let proxy;
     try {
-        proxy = await ethers.getContract(contractName);
+        proxy = await hre.ethers.getContract(contractName);
     } catch (e) {
     }
 
     if (!proxy) {
         console.log(`Proxy ${contractName} not found`)
-        proxy = await upgrades.deployProxy(contractFactory, args, {
+        proxy = await hre.upgrades.deployProxy(contractFactory, args, {
             kind: 'uups',
             unsafeAllow: unsafeAllow
         });
@@ -175,11 +174,11 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
         // You need have permission for role UPGRADER_ROLE;
 
         try {
-            impl = await upgrades.upgradeProxy(proxy, contractFactory, { unsafeAllow: unsafeAllow });
+            impl = await hre.upgrades.upgradeProxy(proxy, contractFactory, { unsafeAllow: unsafeAllow });
         } catch (e) {
-            impl = await upgrades.forceImport( proxy, contractFactory, { unsafeAllow: unsafeAllow })
+            impl = await hre.upgrades.forceImport( proxy, contractFactory, { unsafeAllow: unsafeAllow })
         }
-        implAddress = await getImplementationAddress(ethers.provider, proxy.address);
+        implAddress = await getImplementationAddress(hre.ethers.provider, proxy.address);
         console.log(`Deploy ${contractName} Impl  done -> proxy [` + proxy.address + "] impl [" + implAddress + "]");
     } else {
 
@@ -238,9 +237,9 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
 
         let timelock = await getContract('AgentTimelock');
         if (isZkSync()) {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8011')
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
         } else {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8545')
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
         }
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",

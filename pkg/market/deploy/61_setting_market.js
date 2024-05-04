@@ -1,5 +1,4 @@
 const {getContract} = require("@overnight-contracts/common/utils/script-utils");
-const { ethers } = require("hardhat");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
 

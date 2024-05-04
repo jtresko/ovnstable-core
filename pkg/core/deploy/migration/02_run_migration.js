@@ -4,7 +4,6 @@ const {
     initWallet, getWalletAddress,
 } = require("@overnight-contracts/common/utils/script-utils");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {getImplementationAddress} = require("@openzeppelin/upgrades-core");
 const {expect} = require("chai");
@@ -15,7 +14,7 @@ const isInsurance = true;
 
 module.exports = async () => {
 
-    let isLocalTest = hre.network.name === 'localhost';
+    let isLocalTest = process.env.network === 'localhost';
 
     let usdPlus = await getContract('UsdPlusToken');
     let exchange = await getContract('Exchange');
@@ -27,7 +26,7 @@ module.exports = async () => {
     let wrappedPureAddress = '0x46B0Bc31238195fBdc7258f91fE848FFFDe5d123';
     let exchangeAddress = '0xff750f3870D6D98082FC60Fb5273Aee1477dFA39';
     let insuranceAddress = isInsurance ? '0x21dC33cDc6E68484aAd323DAD1B65BA88e2dee1f': '';
-    let startBlock = await ethers.provider.getBlockNumber();
+    let startBlock = await hre.ethers.provider.getBlockNumber();
 
     let roleManagerAddress = (await getContract('RoleManager')).address;
     let payoutManagerAddress = (await getContract('OptimismPayoutManager')).address;
@@ -39,16 +38,16 @@ module.exports = async () => {
         await wrapped.connect(timelock).grantRole(Roles.UPGRADER_ROLE, timelock.address);
     });
 
-    let factory = await ethers.getContractFactory('UsdPlusTokenMigration');
-    usdPlus = await ethers.getContractAt(factory.interface, usdPlus.address, await initWallet());
+    let factory = await hre.ethers.getContractFactory('UsdPlusTokenMigration');
+    usdPlus = await hre.ethers.getContractAt(factory.interface, usdPlus.address, await initWallet());
 
     console.log('====[Exchange Upgrade]====');
     console.log('1. upgradeTo');
-    console.log(`Exchange implementation address: ${await getImplementationAddress(ethers.provider, exchange.address)}`);
+    console.log(`Exchange implementation address: ${await getImplementationAddress(hre.ethers.provider, exchange.address)}`);
     await execTimelock(async (timelock) => {
         await exchange.connect(timelock).upgradeTo(exchangeAddress);
     })
-    console.log(`Exchange implementation address: ${await getImplementationAddress(ethers.provider, exchange.address)}`);
+    console.log(`Exchange implementation address: ${await getImplementationAddress(hre.ethers.provider, exchange.address)}`);
     console.log('2. Set PayoutManager');
     await execTimelock(async (timelock) => {
         await exchange.connect(timelock).setPayoutManager(payoutManagerAddress);
@@ -59,11 +58,11 @@ module.exports = async () => {
 
     console.log('====[UsdPlus Migration]====');
     console.log('1. upgradeTo(migration)');
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, usdPlus.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, usdPlus.address)}`);
     await execTimelock(async (timelock) => {
         await usdPlus.connect(timelock).upgradeTo(usdPlusMigrationAddress);
     })
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, usdPlus.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, usdPlus.address)}`);
     console.log('2. MigrationInit');
     await execTimelock(async (timelock) => {
         await usdPlus.connect(timelock).migrationInit(exchange.address, decimals, payoutManagerAddress);
@@ -74,11 +73,11 @@ module.exports = async () => {
 
     console.log('====[UsdPlus Pure]====');
     console.log('1. upgradeTo(pure)');
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, usdPlus.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, usdPlus.address)}`);
     await execTimelock(async (timelock) => {
         await usdPlus.connect(timelock).upgradeTo(usdPlusPureAddress);
     })
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, usdPlus.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, usdPlus.address)}`);
     usdPlus = await getContract('UsdPlusToken');
     console.log('2. SetRoleManager');
     await execTimelock(async (timelock) => {
@@ -88,21 +87,21 @@ module.exports = async () => {
     console.log('====[UsdPlus Pure done]====\n\n\n');
 
     console.log('====[Wrapped Pure]====');
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, wrapped.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, wrapped.address)}`);
     await execTimelock(async (timelock) => {
         await wrapped.connect(timelock).upgradeTo(wrappedPureAddress);
         await wrapped.connect(timelock).setRoleManager(roleManagerAddress);
     })
-    console.log(`usdPlus implementation address: ${await getImplementationAddress(ethers.provider, wrapped.address)}`);
+    console.log(`usdPlus implementation address: ${await getImplementationAddress(hre.ethers.provider, wrapped.address)}`);
     console.log('====[Wrapped Pure done]====\n\n\n');
 
     if (isInsurance) {
         console.log('====[Insurance]====');
-        console.log(`insurance implementation address: ${await getImplementationAddress(ethers.provider, insurance.address)}`);
+        console.log(`insurance implementation address: ${await getImplementationAddress(hre.ethers.provider, insurance.address)}`);
         await execTimelock(async (timelock) => {
             await insurance.connect(timelock).upgradeTo(insuranceAddress);
         })
-        console.log(`insurance implementation address: ${await getImplementationAddress(ethers.provider, insurance.address)}`);
+        console.log(`insurance implementation address: ${await getImplementationAddress(hre.ethers.provider, insurance.address)}`);
         console.log('====[Insurance done]====');
     }
 
@@ -112,9 +111,9 @@ module.exports = async () => {
     expect(payoutManagerAddress).to.equal(await usdPlus.payoutManager());
     expect(payoutManagerAddress).to.equal(await exchange.payoutManager());
     expect(decimals).to.equal(await usdPlus.decimals());
-    expect(usdPlusPureAddress).to.equal(await getImplementationAddress(ethers.provider, usdPlus.address));
-    expect(exchangeAddress).to.equal(await getImplementationAddress(ethers.provider, exchange.address));
-    expect(wrappedPureAddress).to.equal(await getImplementationAddress(ethers.provider, wrapped.address));
+    expect(usdPlusPureAddress).to.equal(await getImplementationAddress(hre.ethers.provider, usdPlus.address));
+    expect(exchangeAddress).to.equal(await getImplementationAddress(hre.ethers.provider, exchange.address));
+    expect(wrappedPureAddress).to.equal(await getImplementationAddress(hre.ethers.provider, wrapped.address));
 
     await checksum(usdPlus, exchange, wrapped, startBlock);
 };

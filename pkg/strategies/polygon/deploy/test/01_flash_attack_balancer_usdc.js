@@ -1,5 +1,5 @@
 const {POLYGON} = require('@overnight-contracts/common/utils/assets');
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 let bbamUsdc = "0xF93579002DBE8046c43FEfE86ec78b1112247BB8";
 let bbamUsdt = "0xFf4ce5AAAb5a627bf82f4A571AB1cE94Aa365eA6";
@@ -22,7 +22,7 @@ module.exports = async ({deployments}) => {
         log: true,
     });
 
-    const attackContract = await ethers.getContract("FlashAttackBalancerUsdc");
+    const attackContract = await hre.ethers.getContract("FlashAttackBalancerUsdc");
 
     await (await attackContract.setParams(
         {

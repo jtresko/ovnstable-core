@@ -1,6 +1,6 @@
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const {BLAST, COMMON} = require('@overnight-contracts/common/utils/assets');
-const {deploySection, settingSection, transferETH, getWalletAddress, getPrice} = require("@overnight-contracts/common/utils/script-utils");
+const {deploySection, settingSection, transferETH, getPrice} = require("@overnight-contracts/common/utils/script-utils");
 
 
 module.exports = async ({deployments}) => {

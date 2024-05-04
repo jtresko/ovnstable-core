@@ -3,7 +3,6 @@ const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {expect} = require("chai");
 const hre = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
-const {getNamedAccounts, deployments, ethers} = require("hardhat");
 const {ARBITRUM, OPTIMISM} = require("@overnight-contracts/common/utils/assets");
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
 const expectRevert = require("@overnight-contracts/common/utils/expectRevert");
@@ -24,11 +23,11 @@ describe("AssetOracleOffChain", function () {
 
         account = deployer;
         testAccount = await createRandomWallet();
-        await deployments.fixture(['TestAssetOracleOffchain']);
+        await hre.deployments.fixture(['TestAssetOracleOffchain']);
 
-        oracle = await ethers.getContract('AssetOracleOffChain');
-        ovnToken = await ethers.getContract('OvnToken');
-        underlyingOracle = await ethers.getContract('MockPriceFeed');
+        oracle = await hre.ethers.getContract('AssetOracleOffChain');
+        ovnToken = await hre.ethers.getContract('OvnToken');
+        underlyingOracle = await hre.ethers.getContract('MockPriceFeed');
 
         let params = {
             roleManager: oracle.address,
@@ -164,8 +163,8 @@ describe("AssetOracleOffChain", function () {
 
         it('revert: price is old', async function (){
 
-            await ethers.provider.send("evm_increaseTime", [25 * 60 * 60]);
-            await ethers.provider.send('evm_mine');
+            await hre.ethers.provider.send("evm_increaseTime", [25 * 60 * 60]);
+            await hre.ethers.provider.send('evm_mine');
 
             await expectRevert(oracle.convert(OPTIMISM.usdc, ovnToken.address, toE6(10)), 'price is old');
 

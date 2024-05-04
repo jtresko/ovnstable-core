@@ -1,5 +1,4 @@
 const { expect } = require("chai");
-const { deployments, ethers, getNamedAccounts } = require("hardhat");
 const {
     transferAsset,
     getERC20,
@@ -283,9 +282,9 @@ describe(`Test ${params?.name}`, function () {
     sharedBeforeEach('deploy and setup', async () => {
         await hre.run("compile");
         await resetHardhatToLastBlock();
-        await deployments.fixture([params.name]);
+        await hre.deployments.fixture([params.name]);
 
-        zap = await ethers.getContract(params.name);
+        zap = await hre.ethers.getContract(params.name);
 
         let setUpParams = await setUp(params);
 
@@ -423,7 +422,7 @@ describe(`Test ${params?.name}`, function () {
         )).wait();
 
         if ('tokenId' in params) {
-            let gauge = await ethers.getContractAt(abiNFTPool, params.gauge, account);
+            let gauge = await hre.ethers.getContractAt(abiNFTPool, params.gauge, account);
             let lastTokenId = await gauge.lastTokenId();
             params.tokenId = lastTokenId;
             console.log("lastTokenId: " + lastTokenId);
@@ -671,18 +670,13 @@ function calculateProportionForPool(
 
 async function setUp(params) {
 
-    const signers = await ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     const account = signers[0];
 
-    let usdPlus = await getContract('UsdPlusToken', process.env.STAND);
-    // let daiPlus = await getContract('UsdPlusToken', process.env.STAND + '_dai');
+    let usdPlus = await getContract('UsdPlusToken', process.env.stand);
+    // let daiPlus = await getContract('UsdPlusToken', process.env.stand + '_dai');
 
-    let usdc;
-    if (process.env.STAND === 'base') {
-        usdc = await getERC20('usdbc');
-    } else {
-        usdc = await getERC20('usdc');
-    }
+    let usdc = await getERC20('usdc');
     let dai = await getERC20('dai');
 
     await transferAsset(usdc.address, account.address);

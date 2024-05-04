@@ -1,10 +1,9 @@
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
 const {
     getContract,
     execTimelock,
-    initWallet, getWalletAddress,
+    initWallet,
 } = require("@overnight-contracts/common/utils/script-utils");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 
@@ -16,7 +15,7 @@ module.exports = async ({deployments}) => {
 
     let params = {args: ["USD+", "USD+", 6]};
 
-    let usdPlus = (await ethers.getContract('UsdPlusToken')).connect(wallet);
+    let usdPlus = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
     let userAddress = "0xff871820adf1a0EEDAc0b3691D7f9bBE5Cf8e96c";
 
     await execTimelock(async (timelock) => {
@@ -27,8 +26,8 @@ module.exports = async ({deployments}) => {
 
     await deployProxy('UsdPlusToken', deployments, save, params);
 
-    let usdPlus2 = (await ethers.getContract('UsdPlusToken')).connect(wallet);
-    let roleManager = await ethers.getContract('RoleManager');
+    let usdPlus2 = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
+    let roleManager = await hre.ethers.getContract('RoleManager');
     // await (await usdPlus2.fix(roleManager.address)).wait();
 
     let balance = await usdPlus.balanceOf(userAddress);

@@ -411,35 +411,35 @@ let BLAST = {
 }
 
 function getAsset(name) {
-    let assets = getAssets(process.env.ETH_NETWORK);
+    let assets = getAssets(process.env.stand);
     return assets[name];
 }
 
-function getAssets(network) {
+function getAssets(stand) {
     let assets;
-    switch (network) {
-        case 'ARBITRUM':
+    switch (stand) {
+        case 'arbitrun':
             assets = ARBITRUM;
             break;
-        case 'BSC':
+        case 'bsc':
             assets = BSC;
             break;
-        case 'POLYGON':
+        case 'polygon':
             assets = POLYGON;
             break;
-        case "OPTIMISM":
+        case "optimism":
             assets = OPTIMISM;
             break
-        case "ZKSYNC":
+        case "zksync":
             assets = ZKSYNC;
             break
-        case "LINEA":
+        case "linea":
             assets = LINEA;
             break
-        case "BASE":
+        case "base":
             assets = BASE;
             break
-        case "BLAST":
+        case "blast":
             assets = BLAST;
             break
         default:

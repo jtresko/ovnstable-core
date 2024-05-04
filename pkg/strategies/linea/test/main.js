@@ -21,7 +21,7 @@ describe("LINEA", function () {
 
     console.log(`Strategy ID ${params.name}`);
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'linea_usdt':
             strategyTest(params, 'LINEA', 'usdt', runStrategyLogic);
             break;

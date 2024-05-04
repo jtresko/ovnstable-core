@@ -22,7 +22,7 @@ describe("ZKSYNC", function () {
     console.log(`Strategy ID ${params.name}`);
 
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'zksync':
             strategyTest(params, 'ZKSYNC', 'usdb', runStrategyLogic);
             break;

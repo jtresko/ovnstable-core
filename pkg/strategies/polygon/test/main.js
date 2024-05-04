@@ -21,8 +21,8 @@ async function runStrategyLogic(strategyName, strategyAddress) {
             method: "hardhat_impersonateAccount",
             params: [governanceAddress],
         });
-        const governance = await ethers.getSigner(governanceAddress);
-        let controller = await ethers.getContractAt(IController, "0x6678814c273d5088114B6E40cC49C8DB04F9bC29");
+        const governance = await hre.ethers.getSigner(governanceAddress);
+        let controller = await hre.ethers.getContractAt(IController, "0x6678814c273d5088114B6E40cC49C8DB04F9bC29");
         await controller.connect(governance).changeWhiteListStatus([strategyAddress], true);
         await hre.network.provider.request({
             method: "hardhat_stopImpersonatingAccount",
@@ -35,8 +35,8 @@ async function runStrategyLogic(strategyName, strategyAddress) {
             method: "hardhat_impersonateAccount",
             params: [ownerAddress],
         });
-        const owner = await ethers.getSigner(ownerAddress);
-        let masterMerkat = await ethers.getContractAt(MasterMerkat, "0xa2B417088D63400d211A4D5EB3C4C5363f834764");
+        const owner = await hre.ethers.getSigner(ownerAddress);
+        let masterMerkat = await hre.ethers.getContractAt(MasterMerkat, "0xa2B417088D63400d211A4D5EB3C4C5363f834764");
         await masterMerkat.connect(owner).setWhitelist(strategyAddress, true);
         await hre.network.provider.request({
             method: "hardhat_stopImpersonatingAccount",

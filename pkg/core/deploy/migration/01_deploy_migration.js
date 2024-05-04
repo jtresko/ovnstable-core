@@ -1,11 +1,5 @@
-const {
-    getContract,
-    initWallet,
-    transferETH,
-    getWalletAddress,
-} = require("@overnight-contracts/common/utils/script-utils");
+const { getContract, initWallet, transferETH, getWalletAddress } = require("@overnight-contracts/common/utils/script-utils");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
 const sampleModule = require("@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl");
 const { deployProxyMulti } = require("@overnight-contracts/common/utils/deployProxy");
 
@@ -15,9 +9,9 @@ module.exports = async ({deployments}) => {
     await transferETH(1, await getWalletAddress())
 
     let usdPlus = (await getContract('UsdPlusToken')).connect(wallet);
-    let factory = await ethers.getContractFactory('UsdPlusTokenMigration');
+    let factory = await hre.ethers.getContractFactory('UsdPlusTokenMigration');
 
-    usdPlus = await ethers.getContractAt(factory.interface, usdPlus.address);
+    usdPlus = await hre.ethers.getContractAt(factory.interface, usdPlus.address);
 
     console.log('Try to deploy UsdPlusMigration'); 
     hre.ovn.impl = true;

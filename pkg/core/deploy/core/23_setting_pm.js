@@ -1,14 +1,13 @@
-const {ethers} = require("hardhat");
-
+const hre = require("hardhat");
 const {initWallet, getContract, getCoreAsset} = require("@overnight-contracts/common/utils/script-utils");
 
 module.exports = async () => {
 
     let wallet = await initWallet();
 
-    const pm = await ethers.getContract("PortfolioManager", wallet);
-    const exchange = await ethers.getContract("Exchange", wallet);
-    const m2m = await ethers.getContract("Mark2Market", wallet);
+    const pm = await hre.ethers.getContract("PortfolioManager", wallet);
+    const exchange = await hre.ethers.getContract("Exchange", wallet);
+    const m2m = await hre.ethers.getContract("Mark2Market", wallet);
     const roleManager = await getContract("RoleManager");
 
     let asset = await getCoreAsset();

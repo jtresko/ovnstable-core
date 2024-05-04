@@ -1,6 +1,6 @@
 const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { BASE } = require("@overnight-contracts/common/utils/assets");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({ deployments }) => {
@@ -13,7 +13,7 @@ module.exports = async ({ deployments }) => {
         odosRouter: BASE.odosRouterV2
     }
 
-    let zap = await ethers.getContract('CurveZap');
+    let zap = await hre.ethers.getContract('CurveZap');
 
     await (await zap.setParams(params)).wait();
     console.log('CurveZap setParams done()');

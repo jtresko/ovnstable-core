@@ -1,11 +1,11 @@
 const axios = require("axios");
 const BigNumber = require('bignumber.js');
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 const {getChainId} = require("./script-utils");
 
 async function getOdosSwapData(tokenIn, tokenOut, amountTokenIn) {
 
-    let insurance = await ethers.getContract("InsuranceExchange");
+    let insurance = await hre.ethers.getContract("InsuranceExchange");
 
     const inputToken = { "tokenAddress": tokenIn, "amount": amountTokenIn.toString() };
     const outputToken = { "tokenAddress": tokenOut, "proportion": 1 };
@@ -29,7 +29,7 @@ async function getOdosSwapData(tokenIn, tokenOut, amountTokenIn) {
 
 async function getOdosAmountOut(tokenIn, tokenOut, amountTokenIn) {
 
-    let insurance = await ethers.getContract("InsuranceExchange");
+    let insurance = await hre.ethers.getContract("InsuranceExchange");
 
     const inputToken = { "tokenAddress": tokenIn, "amount": amountTokenIn.toString() };
     const outputToken = { "tokenAddress": tokenOut, "proportion": 1 };
@@ -109,7 +109,7 @@ function getEmptyOdosData(){
         inputTokenAddress: zeroAddress,
         outputTokenAddress: zeroAddress,
         amountIn: 0,
-        data: ethers.utils.formatBytes32String("")
+        data: hre.ethers.encodeBytes32String("")
     }
 
     return odosEmptyData;

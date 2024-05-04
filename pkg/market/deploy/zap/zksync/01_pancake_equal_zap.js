@@ -1,8 +1,6 @@
-const {
-    deployProxy,
-} = require("@overnight-contracts/common/utils/deployProxy");
+const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { ZKSYNC } = require("@overnight-contracts/common/utils/assets");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({ deployments }) => {
@@ -16,7 +14,7 @@ module.exports = async ({ deployments }) => {
         npm: ZKSYNC.pancakeNpm,
     };
 
-    let zap = await ethers.getContract("PancakeEqualZap");
+    let zap = await hre.ethers.getContract("PancakeEqualZap");
 
     await (await zap.setParams(params)).wait();
     console.log("PancakeEqualZap setParams done()");

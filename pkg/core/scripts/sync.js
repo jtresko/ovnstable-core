@@ -2,7 +2,7 @@ const {getContract, initWallet} = require("@overnight-contracts/common/utils/scr
 const {createProposal} = require("@overnight-contracts/common/utils/governance");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const fs = require("fs");
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 
 async function main() {
 
@@ -18,7 +18,7 @@ async function main() {
         "type": "function"
     }]
 
-    let pool = await ethers.getContractAt(ABI, poolAddress, wallet);
+    let pool = await hre.ethers.getContractAt(ABI, poolAddress, wallet);
 
     let receipt = await (await pool.sync()).wait();
 

@@ -1,6 +1,6 @@
 const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { ARBITRUM, OPTIMISM, BSC } = require("@overnight-contracts/common/utils/assets");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({ deployments }) => {
@@ -14,7 +14,7 @@ module.exports = async ({ deployments }) => {
         thenaRouter: BSC.thenaRouter
     }
 
-    let zap = await ethers.getContract('ThenaZap');
+    let zap = await hre.ethers.getContract('ThenaZap');
     await (await zap.setParams(params)).wait();
     console.log('ThenaZap setParams done()');
 };

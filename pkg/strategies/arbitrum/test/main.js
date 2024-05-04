@@ -49,7 +49,7 @@ describe("ARBITRUM", function () {
 
     console.log(`Strategy ID ${params.name}`);
 
-    switch (process.env.STAND) {
+    switch (process.env.standtoken) {
         case 'arbitrum_dai':
             strategyTest(params, 'ARBITRUM', 'dai', runStrategyLogic);
             break;

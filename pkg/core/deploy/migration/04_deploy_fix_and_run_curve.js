@@ -1,12 +1,7 @@
-const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
-const {
-    getContract,
-    execTimelock,
-    initWallet, getWalletAddress,
-} = require("@overnight-contracts/common/utils/script-utils");
-const {Roles} = require("@overnight-contracts/common/utils/roles");
+const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
+const { getContract, execTimelock, initWallet, getWalletAddress } = require("@overnight-contracts/common/utils/script-utils");
+const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({deployments}) => {
     const {save} = deployments;
@@ -16,7 +11,7 @@ module.exports = async ({deployments}) => {
 
     let params = {args: ["USD+", "USD+", 6]};
 
-    let usdPlus = (await ethers.getContract('UsdPlusToken')).connect(wallet);
+    let usdPlus = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
 
     await execTimelock(async (timelock) => {
         await usdPlus.connect(timelock).grantRole(Roles.DEFAULT_ADMIN_ROLE, "0x66b439c0a695cc3ed3d9f50aa4e6d2d917659ffd")
@@ -31,8 +26,8 @@ module.exports = async ({deployments}) => {
 
     await deployProxy('UsdPlusToken', deployments, save, params);
 
-    let usdPlus2 = (await ethers.getContract('UsdPlusToken')).connect(wallet);
-    let roleManager = await ethers.getContract('RoleManager');
+    let usdPlus2 = (await hre.ethers.getContract('UsdPlusToken')).connect(wallet);
+    let roleManager = await hre.ethers.getContract('RoleManager');
     
     console.log('UsdPlusToken deploy done()');
 
@@ -44,7 +39,7 @@ module.exports = async ({deployments}) => {
 
     await usdPlus.approve(curveAddress, "100000000");
 
-    const curve = (await ethers.getContractAt(curveAbi, curveAddress, wallet.address)).connect(wallet);
+    const curve = (await hre.ethers.getContractAt(curveAbi, curveAddress, wallet.address)).connect(wallet);
 
     const poolAddress = "0xb34a7d1444a707349bc7b981b7f2e1f20f81f013";
     const depositAmounts = [100000000, 0, 0];

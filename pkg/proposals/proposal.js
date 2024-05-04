@@ -1,5 +1,5 @@
 const hre = require("hardhat");
-const {getContract, showM2M, execTimelock, initWallet, convertWeights} = require("@overnight-contracts/common/utils/script-utils");
+const {getContract, showM2M, execTimelock, initWallet} = require("@overnight-contracts/common/utils/script-utils");
 const {createProposal, testProposal, testUsdPlus, testStrategy} = require("@overnight-contracts/common/utils/governance");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 const {Wallets} = require("@overnight-contracts/common/utils/wallets");

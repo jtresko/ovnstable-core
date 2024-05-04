@@ -1,7 +1,5 @@
 const {toAsset} = require("@overnight-contracts/common/utils/decimals");
-
-const {getContract, showM2M, getCoreAsset, transferETH, initWallet, getWalletAddress} = require("@overnight-contracts/common/utils/script-utils");
-
+const {getContract, showM2M, getCoreAsset, transferETH, initWallet} = require("@overnight-contracts/common/utils/script-utils");
 
 async function main() {
 

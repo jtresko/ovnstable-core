@@ -52,17 +52,11 @@ This repository contains is next modules:
 1. common - it contains common scripts for deploying, build, testing contracts
 2. connectors - interfaces/libraries for integration with other protocols
 3. core - core contracts: UsdPlusToken/Exchange and etc.
-4. governance-new - new governance contracts
-5. leverage - RND contract with leverage strategies [DEPRECATED]
-6. lockup - contracts for lock OVN tokens
-7. market - ZapIns and WrappedUsdPlus contracts
-8. pools - deploy scripts and other date about USD+ pools on Balancer and etc.
-9. pre-sale - contracts of pre-sale OVN
-10. proposals - governance proposals
-11. recovery - information about recovery data after hachs
-12. strategies - contains sub modules with strategies for each chain
-13. swapper - RND on-chain swapper (1inch)
-14. sy - integrate USD+ in Pendle
+4. governance - new governance contracts
+5. lockup - contracts for lock OVN tokens
+6. market - ZapIns and WrappedUsdPlus contracts
+7. proposals - governance proposals
+8. strategies - contains sub modules with strategies for each chain
 
 ## Tutorials [NOT ACTUAL]
 

@@ -1,4 +1,4 @@
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 
 let {POLYGON} = require('@overnight-contracts/common/utils/assets');
 
@@ -6,7 +6,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
-    const mockUsdPlusToken = await ethers.getContract("MockUsdPlusToken");
+    const mockUsdPlusToken = await hre.ethers.getContract("MockUsdPlusToken");
 
     await deploy('MockExchange', {
         from: deployer,

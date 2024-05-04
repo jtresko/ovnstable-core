@@ -1,5 +1,4 @@
 const hre = require("hardhat");
-const {deployments, getNamedAccounts, ethers} = require("hardhat");
 const BigNumber = require('bignumber.js');
 const {expect} = require("chai");
 const chai = require("chai");
@@ -54,7 +53,7 @@ describe("FlashAttackStrategy", function () {
         });
 
         it(`Test`, async function () {
-            expect(VALUE.toNumber()).to.greaterThan(0);
+            expect(Number(VALUE)).to.greaterThan(0);
         });
 
     });
@@ -75,16 +74,16 @@ async function setUp(network, assetName) {
         tags: strategyName
     }
 
-    await deployments.fixture([flashAttackName, strategyName]);
+    await hre.deployments.fixture([flashAttackName, strategyName]);
 
-    const signers = await ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     const account = signers[0];
     const recipient = signers[1];
 
-    const strategy = await ethers.getContract(strategyName);
+    const strategy = await hre.ethers.getContract(strategyName);
     await strategy.setPortfolioManager(recipient.address);
 
-    const attackStrategy = await ethers.getContract(flashAttackName);
+    const attackStrategy = await hre.ethers.getContract(flashAttackName);
 
     let mainAddress = (await initWallet()).address;
     await transferETH(100, mainAddress);

@@ -1,6 +1,5 @@
 const { expect } = require("chai");
 const chai = require("chai");
-const { deployments, ethers, getNamedAccounts, upgrades } = require("hardhat");
 const { createRandomWallet, resetHardhat } = require("@overnight-contracts/common/utils/tests");
 const hre = require("hardhat");
 let { ARBITRUM } = require('@overnight-contracts/common/utils/assets');
@@ -41,9 +40,9 @@ describe("InchSwapper", function () {
 
         account = deployer;
 
-        await deployments.fixture(['InchSwapper']);
+        await hre.deployments.fixture(['InchSwapper']);
 
-        inchSwapper = await ethers.getContract('InchSwapper');
+        inchSwapper = await hre.ethers.getContract('InchSwapper');
         testAccount = await createRandomWallet();
         unregisteredAccount = await createRandomWallet();
 

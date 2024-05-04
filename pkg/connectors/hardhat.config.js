@@ -1,19 +1,13 @@
 require('hardhat-deploy');
 require('@openzeppelin/hardhat-upgrades');
-require("@nomiclabs/hardhat-etherscan");
-require("hardhat-gas-reporter")
-require("@nomiclabs/hardhat-waffle");
+require("@nomicfoundation/hardhat-verify");
 require('@overnight-contracts/common/utils/hardhat-ovn');
 
-const config = require("../common/utils/hardhat-config");
+const config = require("@overnight-contracts/common/utils/hardhat-config");
 
 module.exports = {
-
     namedAccounts: config.namedAccounts,
-    networks: config.getNetworks(),
+    networks: config.networks,
     solidity: config.solidity,
-    etherscan: config.etherscan(),
-    mocha: config.mocha,
-    gasReporter: config.gasReport
-
+    etherscan: config.etherscan
 };

@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require('hardhat');
 const {toE6, fromE6, toE18, fromE18} = require("@overnight-contracts/common/utils/decimals");
 const hre = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
@@ -14,7 +13,7 @@ const {
     initWallet,
     getContract,
     getERC20,
-    getERC20ByAddress, transferAsset
+    transferAsset
 } = require("@overnight-contracts/common/utils/script-utils");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 
@@ -63,17 +62,17 @@ describe("InsuranceExchange", function () {
             sharedBeforeEach("deploy contracts", async () => {
                 await hre.run("compile");
 
-                await deployments.fixture(['MockInsurance']);
+                await hre.deployments.fixture(['MockInsurance']);
 
-                const signers = await ethers.getSigners();
+                const signers = await hre.ethers.getSigners();
                 account = signers[0];
 
                 testAccount = await createRandomWallet();
                 collector = await createRandomWallet();
 
-                insurance = await ethers.getContract("InsuranceExchange");
-                rebase = await ethers.getContract('RebaseToken');
-                asset = await ethers.getContract('AssetToken');
+                insurance = await hre.ethers.getContract("InsuranceExchange");
+                rebase = await hre.ethers.getContract('RebaseToken');
+                asset = await hre.ethers.getContract('AssetToken');
 
                 if (decimal.rebase === 6) {
                     toRebase = toE6;
@@ -401,8 +400,8 @@ describe("InsuranceExchange", function () {
 
             let delay = await insurance.requestWaitPeriod();
 
-            await ethers.provider.send("evm_increaseTime", [delay.toNumber()]);
-            await ethers.provider.send('evm_mine');
+            await hre.ethers.provider.send("evm_increaseTime", [Number(delay)]);
+            await hre.ethers.provider.send('evm_mine');
         }
 
         async function waitWithdrawPeriod() {
@@ -410,8 +409,8 @@ describe("InsuranceExchange", function () {
             let delay = await insurance.requestWaitPeriod();
             let withdrawPeriod = await insurance.withdrawPeriod();
 
-            await ethers.provider.send("evm_increaseTime", [delay.toNumber() + withdrawPeriod.toNumber()]);
-            await ethers.provider.send('evm_mine');
+            await hre.ethers.provider.send("evm_increaseTime", [Number(delay) + Number(withdrawPeriod)]);
+            await hre.ethers.provider.send('evm_mine');
         }
     });
 });

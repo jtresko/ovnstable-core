@@ -2,13 +2,10 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const { expect } = require('chai');
-const hre = require('hardhat');
-
+const hre = require("hardhat");
 const fs = require('fs-extra');
-
 const { node_url, blockNumber } = require('../utils/network');
-const { ethers } = require('hardhat');
-const { transferETH, getDevWallet, getERC20, transferAsset, execTimelock, getContract, getChainId, initWallet } = require('./script-utils');
+const { transferETH, getERC20, transferAsset, execTimelock, getContract, getChainId, initWallet } = require('./script-utils');
 const HedgeExchangerABI = require('./abi/HedgeExchanger.json');
 const InchSwapperABI = require('./abi/InchSwapper.json');
 const StakerABI = require('./abi/Staker.json');
@@ -30,11 +27,11 @@ function greatLess(value, expected, delta) {
     expect(value.lte(maxValue)).to.equal(true);
 }
 
-async function resetHardhat(network) {
-    let block = blockNumber(network);
-    let url = node_url(network);
+async function resetHardhat() {
+    let block = blockNumber();
+    let url = node_url();
     if (block == 0) {
-        const provider = new ethers.providers.JsonRpcProvider(url);
+        const provider = new hre.ethers.JsonRpcProvider(url);
         block = (await provider.getBlockNumber()) - 31;
     }
 
@@ -54,8 +51,7 @@ async function resetHardhat(network) {
 }
 
 async function resetHardhatToLastBlock() {
-    let networkName = process.env.ETH_NETWORK;
-    const provider = new ethers.providers.JsonRpcProvider(node_url(networkName));
+    const provider = new hre.ethers.JsonRpcProvider(node_url());
     let block = (await provider.getBlockNumber()) - 31;
 
     await hre.network.provider.request({
@@ -63,7 +59,7 @@ async function resetHardhatToLastBlock() {
         params: [
             {
                 forking: {
-                    jsonRpcUrl: node_url(networkName),
+                    jsonRpcUrl: node_url(),
                     blockNumber: block,
                 },
             },
@@ -79,10 +75,10 @@ async function setStrategyAsDepositor(strategyAddress) {
 
     await transferETH(1, wallet.address);
 
-    let wrapperStrategy = await ethers.getContractAt(WRAPPER_DIAMOND_STRATEGY, strategyAddress, wallet);
+    let wrapperStrategy = await hre.ethers.getContractAt(WRAPPER_DIAMOND_STRATEGY, strategyAddress, wallet);
 
     let diamondStrategyAddress = await wrapperStrategy.strategy();
-    let diamondStrategy = await ethers.getContractAt(DIAMOND_STRATEGY, diamondStrategyAddress, wallet);
+    let diamondStrategy = await hre.ethers.getContractAt(DIAMOND_STRATEGY, diamondStrategyAddress, wallet);
 
     await execTimelock(async timelock => {
         if (await diamondStrategy.hasRole(Roles.DEFAULT_ADMIN_ROLE, wallet.address)) {
@@ -102,12 +98,12 @@ async function impersonatingEtsGrantRole(hedgeExchangerAddress, ownerAddress, st
         method: 'hardhat_impersonateAccount',
         params: [ownerAddress],
     });
-    const owner = await ethers.getSigner(ownerAddress);
-    let hedgeExchanger = await ethers.getContractAt(HedgeExchangerABI, hedgeExchangerAddress);
+    const owner = await hre.ethers.getSigner(ownerAddress);
+    let hedgeExchanger = await hre.ethers.getContractAt(HedgeExchangerABI, hedgeExchangerAddress);
     await hedgeExchanger.connect(owner).grantRole(Roles.PORTFOLIO_AGENT_ROLE, ownerAddress);
     await hedgeExchanger.connect(owner).grantRole(Roles.WHITELIST_ROLE, strategyAddress);
     await hedgeExchanger.connect(owner).grantRole(Roles.FREE_RIDER_ROLE, strategyAddress);
-    if (process.env.STAND.includes('arbitrum')) {
+    if (process.env.stand === "arbitrum") {
         await hedgeExchanger.connect(owner).setBlockGetter(ZERO_ADDRESS);
     }
     await hre.network.provider.request({
@@ -131,10 +127,10 @@ async function impersonatingEtsGrantRoleWithInchSwapper(
         method: 'hardhat_impersonateAccount',
         params: [ownerAddress],
     });
-    const owner = await ethers.getSigner(ownerAddress);
+    const owner = await hre.ethers.getSigner(ownerAddress);
 
-    let inchSwapper = await ethers.getContractAt(InchSwapperABI, inchSwapperAddress);
-    let hedgeExchanger = await ethers.getContractAt(HedgeExchangerABI, hedgeExchangerAddress);
+    let inchSwapper = await hre.ethers.getContractAt(InchSwapperABI, inchSwapperAddress);
+    let hedgeExchanger = await hre.ethers.getContractAt(HedgeExchangerABI, hedgeExchangerAddress);
     let hedgeExchangeAdmin;
     let DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000';
     if (await hedgeExchanger.hasRole(DEFAULT_ADMIN_ROLE, owner.address)) {
@@ -144,12 +140,12 @@ async function impersonatingEtsGrantRoleWithInchSwapper(
             method: 'hardhat_impersonateAccount',
             params: ['0x66BC0120b3287f08408BCC76ee791f0bad17Eeef'],
         });
-        hedgeExchangeAdmin = await ethers.getSigner('0x66BC0120b3287f08408BCC76ee791f0bad17Eeef');
+        hedgeExchangeAdmin = await hre.ethers.getSigner('0x66BC0120b3287f08408BCC76ee791f0bad17Eeef');
     }
     await hedgeExchanger.connect(hedgeExchangeAdmin).grantRole(Roles.PORTFOLIO_AGENT_ROLE, ownerAddress);
     await hedgeExchanger.connect(hedgeExchangeAdmin).grantRole(Roles.WHITELIST_ROLE, strategyAddress);
     await hedgeExchanger.connect(hedgeExchangeAdmin).grantRole(Roles.FREE_RIDER_ROLE, strategyAddress);
-    if (process.env.STAND.includes('arbitrum')) {
+    if (process.env.stand === "arbitrum") {
         await inchSwapper.connect(owner).setParams(ARBITRUM.inchRouterV5, ZERO_ADDRESS);
         await hedgeExchanger.connect(hedgeExchangeAdmin).setBlockGetter(ZERO_ADDRESS);
     }
@@ -194,8 +190,8 @@ async function impersonatingStaker(stakerAddress, ownerAddress, strategyAddress,
     });
 
     await transferETH(1, ownerAddress);
-    const owner = await ethers.getSigner(ownerAddress);
-    let staker = await ethers.getContractAt(StakerABI, stakerAddress);
+    const owner = await hre.ethers.getSigner(ownerAddress);
+    let staker = await hre.ethers.getContractAt(StakerABI, stakerAddress);
     await staker.connect(owner).whitelistStrategy(strategyAddress, pair, gauge);
 
     await hre.network.provider.request({
@@ -217,12 +213,14 @@ async function prepareArtifacts() {
 }
 
 async function createRandomWallet() {
-    let wallet = ethers.Wallet.createRandom().connect(ethers.provider);
+    let wallet = hre.ethers.Wallet.createRandom().connect(hre.ethers.provider);
     await transferETH(1, wallet.address);
     return wallet;
 }
 
-async function getTestAssets(to, stand = process.env.STAND) {
+async function getTestAssets(to) {
+
+    let stand = process.env.standtoken;
     if (isTestAssetsCompleted) {
         return;
     }
@@ -251,15 +249,15 @@ async function getTestAssets(to, stand = process.env.STAND) {
 }
 
 async function prepareEnvironment() {
-    if (process.env.STAND.includes('arbitrum')) {
+    if (process.env.stand === "arbitrum") {
         await execTimelock(async timelock => {
-            let exchange = await getContract('Exchange', process.env.STAND);
+            let exchange = await getContract('Exchange', process.env.standtoken);
             await exchange.connect(timelock).setBlockGetter(ZERO_ADDRESS);
             console.log('[Test] exchange.setBlockGetter(zero)');
 
             try {
-                let inchSwapper = await getContract('InchSwapper', process.env.STAND);
-                let roleManager = await getContract('RoleManager', process.env.STAND);
+                let inchSwapper = await getContract('InchSwapper', process.env.standtoken);
+                let roleManager = await getContract('RoleManager', process.env.standtoken);
                 await inchSwapper.connect(timelock).setParams(await getAsset('inchRouterV5'), ZERO_ADDRESS, roleManager.address);
                 console.log('[Test] inchSwapper.setBlockGetter(zero)');
             } catch (e) {

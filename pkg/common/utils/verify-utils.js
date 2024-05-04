@@ -1,7 +1,5 @@
 const hre = require("hardhat");
-const ethers = hre.ethers;
 const {getImplementationAddress} = require('@openzeppelin/upgrades-core');
-
 
 async function verify(items) {
 
@@ -21,7 +19,7 @@ async function verify(items) {
 
             let address = deployment.address;
             try {
-                address = await getImplementationAddress(ethers.provider, deployment.address);
+                address = await getImplementationAddress(hre.ethers.provider, deployment.address);
             } catch (e) {
                 console.log('Error found proxy: '+ e.message);
             }

@@ -1,17 +1,34 @@
 const dotenv = require('dotenv');
-
 console.log('Process:' + process.cwd());
 dotenv.config({path:__dirname+ '/../../../.env'});
+const {node_url, accounts, isZkSync, blockNumber} = require("./network");
 
-const {node_url, accounts, blockNumber, isZkSync} = require("./network");
-const {getGasPrice} = require("./network");
-let gasPrice = getGasPrice();
+function getParam(key, defaultValue="") {
+    const args = process.argv;
+    for (let i = 0; i < args.length; i++) {
+        if (args[i] === "--" + key) {
+            return args[i + 1];
+        }
+    }
+    
+    return defaultValue;
+}
 
-let timeout = 362000000;
+if (!process.env.network) {
+    process.env.network = getParam("network", "hardhat");
+    process.env.stand = getParam("stand", "base");
+    process.env.token = getParam("token");
+    process.env.block = getParam("block", "1");
+    process.env.standtoken = process.env.stand + (process.env.token === "" ? "" : "_" + process.env.token);
+}
+console.log("process.env.network", process.env.network);
+console.log("process.env.stand", process.env.stand);
+console.log("process.env.token", process.env.token);
+console.log("process.env.block", process.env.block);
+console.log("process.env.standtoken", process.env.standtoken);
 
 
 class Chain {
-
     static get ARBITRUM() { return 'ARBITRUM'; }
     static get BASE() { return 'BASE'; }
     static get POLYGON() { return 'POLYGON'; }
@@ -21,229 +38,42 @@ class Chain {
     static get LINEA() { return 'LINEA'; }
     static get BLAST() { return 'BLAST'; }
 
-
     static get list() {
         return ['ARBITRUM', 'BASE', 'POLYGON', 'OPTIMISM', 'BSC', 'ZKSYNC', 'LINEA', 'BLAST']
     }
 }
 
-
-
 function getNetworks() {
-
-    let accountsNetwork = accounts('polygon');
-
-    let zkSync = isZkSync();
-
-
-
-    let localhost;
-    if (zkSync){
-        localhost = {
-            // Use local node zkSync for testing
-            url: 'http://localhost:8011',
-            timeout: timeout,
-            accounts: accountsNetwork,
-            zksync: true,
-            ethNetwork: "localhost",
-        }
-    }else {
-        localhost = {
-            timeout: timeout,
-            accounts: accountsNetwork,
-            zksync: false,
-        }
-    }
 
     return {
 
-        base: {
-            url: node_url('base'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
+        main: {
+            url: node_url(),
+            accounts: accounts(),
+            zksync: isZkSync(),
+            timeout: 10000000
         },
-
-        base_dai: {
-            url: node_url('base'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        base_usdc: {
-            url: node_url('base'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        linea_usdt: {
-            url: node_url('linea'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: 'auto',
-            zksync: false,
-        },
-
-
-        linea: {
-            url: node_url('linea'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            gas: 2100000,
-            zksync: false,
-        },
-
-        arbitrum: {
-            url: node_url('arbitrum'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            gas: 2100000,
-            zksync: false,
-        },
-
-        arbitrum_eth: {
-            url: node_url('arbitrum'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-
-        arbitrum_dai: {
-            url: node_url('arbitrum'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        arbitrum_usdt: {
-            url: node_url('arbitrum'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        zksync: {
-            url: node_url('zksync'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            ethNetwork: "mainnet",
-            zksync: true,
-        },
-
-        zksync_usdt: {
-            url: node_url('zksync'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            ethNetwork: "mainnet",
-            zksync: true,
-        },
-
-        optimism: {
-            url: node_url('optimism'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: 'auto',
-            zksync: false,
-        },
-
-        optimism_dai: {
-            url: node_url('optimism'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        bsc: {
-            url: node_url('bsc'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        bsc_usdt: {
-            url: node_url('bsc'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-        },
-
-
-        polygon: {
-            url: node_url('polygon'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        blast: {
-            url: node_url('blast'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        blast_usdc: {
-            url: node_url('blast'),
-            accounts: accountsNetwork,
-            timeout: timeout,
-            gasPrice: "auto",
-            zksync: false,
-        },
-
-        localhost: localhost,
 
         hardhat: {
-            zksync: zkSync,
+            zksync: isZkSync(),
             forking: {
-                url: node_url(process.env.ETH_NETWORK),
-                blockNumber: blockNumber(process.env.ETH_NETWORK),
+                url: node_url(),
+                blockNumber: blockNumber(),
                 ignoreUnknownTxType: true,
             },
             accounts: {
                 accountsBalance: "100000000000000000000000000"
-            },
-            timeout: timeout
-        },
-    }
-}
-
-function getChainFromNetwork(network){
-
-    if (network) {
-
-        network = network.toLowerCase();
-        for (let chain of Chain.list) {
-
-            // network can be = arbitrum_dai | optimism | base_dai ...
-            // chain only = POLYGON|ARBITRUM|BASE ...
-
-            if (network.includes(chain.toLowerCase())){
-                return chain;
             }
+        },
+
+        localhost: {
+            url: node_url(),
+            accounts: accounts(),
+            zksync: isZkSync(),
+            timeout: 10000000
         }
     }
-
-    throw new Error(`Unknown network: ${network}`)
-
 }
-
 
 let namedAccounts = {
     deployer: {
@@ -279,18 +109,10 @@ let solidity = {
     }
 }
 
-let mocha = require("./mocha-report-setting")
 const {ARBITRUM, BASE, POLYGON, OPTIMISM, BLAST} = require("./assets");
 const {Wallets} = require("./wallets");
 
-let gasReport = {
-    enabled: false, // Gas Reporter hides unit-test-mocha report
-    currency: 'MATIC',
-    gasPrice: 70,
-    outputFile: 'gas-report'
-}
-
-function getEtherScan(){
+function getEtherScan() {
 
     let object = {
 
@@ -377,12 +199,9 @@ function getEtherScan(){
 
 module.exports = {
     Chain: Chain,
-    getChainFromNetwork: getChainFromNetwork,
-    getNetworks: getNetworks,
+    networks: getNetworks(),
     namedAccounts: namedAccounts,
     solidity: solidity,
     zksolc: zksolc,
-    mocha: mocha,
-    gasReport: gasReport,
-    etherscan: getEtherScan
+    etherscan: getEtherScan()
 };

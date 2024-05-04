@@ -1,5 +1,4 @@
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
-const {ethers, deployments, getNamedAccounts} = require("hardhat");
 
 module.exports = async ({deployments, getNamedAccounts}) => {
     const {deployer} = await getNamedAccounts();

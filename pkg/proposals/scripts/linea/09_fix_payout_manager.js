@@ -1,12 +1,11 @@
 const hre = require("hardhat");
-const {getContract, showM2M, execTimelock, getWalletAddress, transferETH} = require("@overnight-contracts/common/utils/script-utils");
+const {getContract, showM2M, execTimelock, transferETH} = require("@overnight-contracts/common/utils/script-utils");
 const {createProposal, testProposal, testUsdPlus, testStrategy} = require("@overnight-contracts/common/utils/governance");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
 
 const path = require('path');
 const {prepareEnvironment} = require("@overnight-contracts/common/utils/tests");
 const {strategySiloUsdc} = require("@overnight-contracts/strategies-arbitrum/deploy/38_strategy_silo_usdc");
-const {ethers} = require("hardhat");
 let filename = path.basename(__filename);
 filename = filename.substring(0, filename.indexOf(".js"));
 const {fromAsset, fromUsdPlus} = require("@overnight-contracts/common/utils/decimals");

@@ -5,7 +5,6 @@ const { Roles } = require("@overnight-contracts/common/utils/roles");
 const path = require('path');
 const { prepareEnvironment } = require("@overnight-contracts/common/utils/tests");
 const { strategySiloUsdc } = require("@overnight-contracts/strategies-arbitrum/deploy/38_strategy_silo_usdc");
-const { ethers } = require("hardhat");
 const { strategyEtsEtaParams } = require("@overnight-contracts/strategies-base/deploy/11_ets_eta");
 const {BASE, COMMON} = require('@overnight-contracts/common/utils/assets');
 const {getImplementationAddress} = require('@openzeppelin/upgrades-core');

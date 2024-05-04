@@ -1,4 +1,4 @@
-const {getContract, showM2M, execTimelock, getERC20ByAddress, initWallet} = require("@overnight-contracts/common/utils/script-utils");
+const {getContract, showM2M, execTimelock, initWallet} = require("@overnight-contracts/common/utils/script-utils");
 const {testProposal, createProposal} = require("@overnight-contracts/common/utils/governance");
 const {fromE18} = require("@overnight-contracts/common/utils/decimals");
 

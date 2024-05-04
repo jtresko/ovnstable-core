@@ -4,7 +4,7 @@ const {createProposal} = require("@overnight-contracts/common/utils/governance")
 async function main(){
 
     let exchange = await getContract('InsuranceExchange');
-    let stand = process.env.STAND.replace('_ins', '');
+    let stand = process.env.stand;
     let address = (await getContract('Exchange', stand)).address;
 
     console.log('Stand: ' + stand);

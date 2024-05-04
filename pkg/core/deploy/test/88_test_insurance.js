@@ -1,6 +1,6 @@
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
 const {OPTIMISM} = require("@overnight-contracts/common/utils/assets");
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 
 module.exports = async ({deployments, getNamedAccounts}) => {
@@ -21,10 +21,10 @@ module.exports = async ({deployments, getNamedAccounts}) => {
         log: true,
     });
 
-    let rebase = await ethers.getContract('RebaseToken');
-    let asset = await ethers.getContract('AssetToken');
-    let insurance = await ethers.getContract('InsuranceExchange');
-    let pm = await ethers.getContract('MockPortfolioManager');
+    let rebase = await hre.ethers.getContract('RebaseToken');
+    let asset = await hre.ethers.getContract('AssetToken');
+    let insurance = await hre.ethers.getContract('InsuranceExchange');
+    let pm = await hre.ethers.getContract('MockPortfolioManager');
 
     await asset.setExchanger(deployer);
     await rebase.setExchanger(insurance.address);

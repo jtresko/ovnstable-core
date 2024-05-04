@@ -1,7 +1,6 @@
 const {deployProxy} = require("@overnight-contracts/common/utils/deployProxy");
 const {getContract} = require("@overnight-contracts/common/utils/script-utils");
 const hre = require("hardhat");
-const {ethers} = require("hardhat");
 const {ZERO_ADDRESS} = require("@openzeppelin/test-helpers/src/constants");
 
 module.exports = async ({deployments}) => {
@@ -12,13 +11,13 @@ module.exports = async ({deployments}) => {
 
     let params;
 
-    if (hre.network.name === "optimism_dai") {
+    if (process.env.standtoken === "optimism_dai") {
         params = {args: [usdPlusToken.address, "Wrapped DAI+", "wDAI+", 18, roleManager.address]};
-    } else if (hre.network.name === "arbitrum_dai") {
+    } else if (process.env.standtoken === "arbitrum_dai") {
         params = {args: [usdPlusToken.address, "Wrapped DAI+", "wDAI+", 18, roleManager.address]};
-    } else if (hre.network.name === "arbitrum_eth") {
+    } else if (process.env.standtoken === "arbitrum_eth") {
         params = {args: [usdPlusToken.address, "Wrapped ETH+", "wETH+", 18, roleManager.address]};
-    } else if (hre.network.name === "bsc_usdt") {
+    } else if (process.env.standtoken === "bsc_usdt") {
         params = {args: [usdPlusToken.address, "Wrapped USDT+", "wUSDT+", 18, roleManager.address]};
     } else {
         params = {args: [usdPlusToken.address, "Wrapped USD+", "wUSD+", 6, roleManager.address]};
@@ -28,7 +27,7 @@ module.exports = async ({deployments}) => {
 
     console.log("WrappedUsdPlusToken created");
 
-    let wrappedUsdPlusToken = await ethers.getContract('WrappedUsdPlusToken');
+    let wrappedUsdPlusToken = await hre.ethers.getContract('WrappedUsdPlusToken');
 
     if (await wrappedUsdPlusToken.roleManager() === ZERO_ADDRESS){
 

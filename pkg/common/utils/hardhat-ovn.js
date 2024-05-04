@@ -1,20 +1,12 @@
-const { task, extendEnvironment } = require("hardhat/config");
+console.log("--run hardhat-ovn.js");
+const { task } = require("hardhat/config");
 const fs = require('fs');
 const fse = require('fs-extra');
-const log = require("./initLog.js")
-
-const {
-    TASK_NODE,
-    TASK_COMPILE,
-    TASK_RUN,
-    TASK_TEST,
-} = require('hardhat/builtin-tasks/task-names');
+const { TASK_NODE, TASK_COMPILE, TASK_RUN, TASK_TEST } = require('hardhat/builtin-tasks/task-names');
 const { evmCheckpoint, evmRestore } = require("./sharedBeforeEach");
-const { getNodeUrl, getBlockNumber, node_url } = require("./network");
-const { EthersProviderWrapper } = require("@nomiclabs/hardhat-ethers/internal/ethers-provider-wrapper");
-const { getChainFromNetwork } = require("./hardhat-config");
+const { node_url } = require("./network");
 const { fromE18 } = require("./decimals");
-const { Provider, Wallet } = require("zksync-web3");
+const { Provider, Wallet } = require("zksync-ethers");
 
 task('deploy', 'deploy')
     .addFlag('noDeploy', 'Deploy contract|Upgrade proxy')
@@ -38,10 +30,7 @@ task('deploy', 'deploy')
             id: args.id
         }
 
-        settingNetwork(hre);
-        settingId(hre);
-        updateFeedData(hre);
-
+        // updateFeeData(hre);//todo return
 
         if (args.reset)
             await evmCheckpoint('task', hre.network.provider);
@@ -59,21 +48,15 @@ task('deploy', 'deploy')
 
 task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
     .addFlag('reset', 'Reset files')
-    .addFlag('deploy', 'Run deploy')
     .addOptionalParam('stand', 'Override env STAND')
+    .addOptionalParam('block', 'Override env STAND')
     .addFlag('last', 'Use last block from RPC')
     .setAction(async (args, hre, runSuper) => {
 
+        const srcDir = `deployments/` + process.env.stand;
 
-        if (args.stand) {
-            process.env.STAND = args.stand;
-        }
-
-        const srcDir = `deployments/` + process.env.STAND;
-        if (!process.env.ETH_NETWORK) process.env.ETH_NETWORK = getChainFromNetwork(process.env.STAND);
-
-        console.log(`[Node] STAND: ${process.env.STAND}`);
-        console.log(`[Node] ETH_NETWORK: ${process.env.ETH_NETWORK}`);
+        console.log(`[Node] stand: ${process.env.stand}`);
+        console.log(`[Node] network: ${process.env.network}`);
 
         let chainId = fs.readFileSync(srcDir + "/.chainId", { flag: 'r' });
         chainId = (chainId + "").trim();
@@ -106,26 +89,10 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
             if (err) return console.log(err);
         });
 
-
-        let nodeUrl = getNodeUrl();
-        const provider = new hre.ethers.providers.JsonRpcProvider(nodeUrl);
-
-        if (args.wait) {
-
-            let currentBlock = await provider.getBlockNumber();
-            let needBlock = getBlockNumber() + 30;
-
-            if (needBlock + 30 > currentBlock) {
-                await sleep(3000);
-                currentBlock = await provider.getBlockNumber();
-            }
-        }
-
-
         if (args.last) {
 
-            let nodeUrl = getNodeUrl();
-            const provider = new hre.ethers.providers.JsonRpcProvider(nodeUrl);
+            let nodeUrl = node_url();
+            const provider = new hre.ethers.JsonRpcProvider(nodeUrl);
             let block = await provider.getBlockNumber() - 31;
 
             console.log('Set last block: ' + block);
@@ -144,60 +111,28 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
             })
         }
 
-        if (args.deploy)
-            args.noDeploy = false;
-        else
-            args.noDeploy = true;
+        // I don't know why it is needed
+        args.noDeploy = true;
 
-        if (args.reset)
-            args.noReset = false;
-        else
-            args.noReset = true;
-
+        // need to fix problem "The node was not configured with a hardfork activation history."
+        await transferETH(1, "0x0000000000000000000000000000000000000000");
         console.log('node', args);
-
-
         await runSuper(args);
-
-
     });
 
 
 task(TASK_RUN, 'Run task')
     .addFlag('reset', 'Reset')
     .addOptionalParam('stand', 'Override env STAND')
-    .addOptionalParam('id', 'ETS ID')
+    .addOptionalParam('token', 'Override env STAND')
     .setAction(async (args, hre, runSuper) => {
-        hre.ovn = {
-            noDeploy: args.noDeploy,
-            deploy: !args.noDeploy,
-            setting: args.setting,
-            impl: args.impl,
-            verify: args.verify,
-            tags: args.tags,
-            stand: args.stand,
-            id: args.id,
-        }
-
-
-        if (hre.network.name === 'localhost') {
-
-            if ((process.env.STAND).startsWith('zksync')) {
-                hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8011')
-            } else {
-                hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8545')
-            }
-        }
-
-        settingNetwork(hre);
-        settingId(hre);
-
+    
         if (args.reset)
             await evmCheckpoint('task', hre.network.provider);
 
         await runSuper(args);
 
-        updateFeedData(hre);
+        // updateFeeData(hre); // todo return
 
         if (args.reset)
             await evmRestore('task', hre.network.provider);
@@ -205,12 +140,10 @@ task(TASK_RUN, 'Run task')
 
 
 task(TASK_COMPILE, 'Compile')
+    .addOptionalParam('stand', 'Override env STAND')
     .setAction(async (args, hre, runSuper) => {
-
         args.quiet = true;
-
         await runSuper(args);
-
     });
 
 
@@ -230,16 +163,13 @@ task(TASK_TEST, 'test')
             id: args.id,
         }
 
-        if (hre.network.name === 'localhost') {
-            if ((process.env.STAND).startsWith('zksync')) {
-                hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8011')
+        if (process.env.network === "localhost") {
+            if (process.env.stand === "zksync") {
+                hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
             } else {
-                hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8545')
+                hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
             }
         }
-
-        settingNetwork(hre);
-        settingId(hre);
 
         await evmCheckpoint('task', hre.network.provider);
 
@@ -254,26 +184,21 @@ task('simulate', 'Simulate transaction on local node')
     .addOptionalParam('stand', 'Stand')
     .setAction(async (args, hre, runSuper) => {
 
-
         let hash = args.hash;
-
-        if (args.stand) {
-            process.env.STAND = args.stand;
-        }
 
         console.log(`Simulate transaction by hash: [${hash}]`);
         await evmCheckpoint('simulate', hre.network.provider);
-        let nodeUrl =/*  hre.network.name == 'localhost' ? node_url('localhost'): */ getNodeUrl();
-        const provider = new hre.ethers.providers.JsonRpcProvider(nodeUrl);
+        let nodeUrl = node_url();
+        const provider = new hre.ethers.JsonRpcProvider(nodeUrl);
 
         let receipt = await provider.getTransactionReceipt(hash);
         let transaction = await provider.getTransaction(hash);
 
 
-        if ((args.stand || process.env.STAND).startsWith('zksync')) {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8011')
+        if (process.env.stand === "zksync") {
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
         } else {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8545')
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
         }
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
@@ -283,7 +208,7 @@ task('simulate', 'Simulate transaction on local node')
         const fromSigner = await hre.ethers.getSigner(receipt.from);
         await transferETH(10, receipt.from, hre);
 
-        if ((process.env.STAND).startsWith('zksync')) {
+        if (process.env.stand === "zksync") {
             let {
                 maxFeePerGas, maxPriorityFeePerGas
             } = await hre.ethers.provider.getFeeData();
@@ -329,10 +254,10 @@ task('simulateByData', 'Simulate transaction on local node')
 
         await evmCheckpoint('simulate', hre.network.provider);
 
-        if (( process.env.STAND).startsWith('zksync')) {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8011')
+        if (process.env.stand === "zksync") {
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
         } else {
-            hre.ethers.provider = new hre.ethers.providers.JsonRpcProvider('http://localhost:8545')
+            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
         }
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
@@ -343,7 +268,7 @@ task('simulateByData', 'Simulate transaction on local node')
         await transferETH(100, from, hre);
 
         let tx
-        if ((process.env.STAND).startsWith('zksync')) {
+        if (process.env.stand === "zksync") {
             let {
                 maxFeePerGas, maxPriorityFeePerGas
             } = await hre.ethers.provider.getFeeData();
@@ -375,84 +300,43 @@ task('simulateByData', 'Simulate transaction on local node')
 
     });
 
-function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+function getChainFromNetwork(network) {
 
+    if (network) {
 
-async function transferETH(amount, to) {
+        network = network.toLowerCase();
+        for (let chain of Chain.list) {
 
-    if ((process.env.STAND).startsWith('zksync')) {
-        let provider = new Provider("http://localhost:8011");
-        let wallet = new Wallet('0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110', provider, hre.ethers.provider);
-        console.log(`Balance [${fromE18(await hre.ethers.provider.getBalance(wallet.address))}]:`);
+            // network can be = arbitrum_dai | optimism | base_dai ...
+            // chain only = POLYGON|ARBITRUM|BASE ...
 
-        await wallet.transfer({
-            to: to,
-            token: '0x0000000000000000000000000000000000000000',
-            amount: ethers.utils.parseEther(amount + ""),
-        });
-    } else {
-        let privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Ganache key
-        let walletWithProvider = new ethers.Wallet(privateKey, hre.ethers.provider);
-
-        // вернул как было. у меня не работала почему-то твоя версия
-        await walletWithProvider.sendTransaction({
-            to: to,
-            value: ethers.utils.parseEther(amount + "")
-        });
-    }
-
-    console.log(`[Node] Transfer ETH [${fromE18(await hre.ethers.provider.getBalance(to))}] to [${to}]`);
-}
-function settingId(hre) {
-
-    if (hre.ovn.id) {
-        process.env.ETS = hre.ovn.id;
-    }
-
-}
-
-function settingNetwork(hre) {
-
-    if (hre.network.name !== 'localhost' && hre.network.name !== 'hardhat') {
-        process.env.STAND = hre.network.name;
-        if (!process.env.ETH_NETWORK) process.env.ETH_NETWORK = getChainFromNetwork(hre.network.name);
-
-    } else {
-
-        let standArg = hre.ovn.stand;
-
-        if (standArg) {
-            process.env.STAND = standArg;
-        } else {
-            // Use STAND from process.env.STAND
+            if (network.includes(chain.toLowerCase())){
+                return chain;
+            }
         }
-
-        if (!process.env.ETH_NETWORK) process.env.ETH_NETWORK = getChainFromNetwork(process.env.STAND);
     }
 
-    console.log(`[Node] STAND: ${process.env.STAND}`);
-    console.log(`[Node] ETH_NETWORK: ${process.env.ETH_NETWORK}`);
+    throw new Error(`Unknown network: ${network}`)
+
 }
 
-function updateFeedData(hre) {
+function updateFeeData(hre) {
 
     // TODO network: 'localhost' should use default hardhat ether provider for support reset/snapshot functions
-    if (hre.network.name !== 'localhost' && hre.network.name !== 'hardhat') {
-        let url = node_url(process.env.ETH_NETWORK);
-        let provider = new hre.ethers.providers.StaticJsonRpcProvider(url);
+    if (process.env.network === "main") {
+        let url = node_url();
+        // let provider = new hre.ethers.StaticJsonRpcProvider(url);
 
         let getFeeData = async function () {
-            if (hre.network.name == "zksync") {
+            if (process.env.stand === "zksync") {
                 let {
                     maxFeePerGas, maxPriorityFeePerGas
-                } = await ethers.provider.getFeeData();
+                } = await hre.ethers.provider.getFeeData();
 
                 return { maxFeePerGas, maxPriorityFeePerGas }
 
             } else {
-                let gasPrice = await provider.getGasPrice();
+                let gasPrice = await hre.ethers.provider.getGasPrice();
                 console.log(`Get gasPrice: ${gasPrice.toString()}`);
                 return {
                     gasPrice: gasPrice
@@ -463,14 +347,43 @@ function updateFeedData(hre) {
 
         // By default hre.ethers.provider is proxy object.
         // Hardhat recreate proxy by events but for real chains we override it
-        hre.ethers.provider = new EthersProviderWrapper(hre.network.provider);
+        hre.ethers.provider = new hre.ethers.BrowserProvider(hre.network.provider);
         hre.ethers.provider.getFeeData = getFeeData;
     }
 
 }
 
+async function transferETH(amount, to) {
+    if (process.env.stand === "zksync") {
+        let provider = new Provider("http://localhost:8011");
+        let wallet = new Wallet('0x7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110', provider, hre.ethers.provider);
+        console.log(`Balance [${fromE18(await provider.getBalance(wallet.address))}]:`);
+
+        await wallet.transfer({
+            to: to,
+            token: '0x0000000000000000000000000000000000000000',
+            amount: hre.ethers.parseEther(amount + ""),
+        });
+    } else {
+        let privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"; // Ganache key
+        let walletWithProvider = new hre.ethers.Wallet(privateKey, hre.ethers.provider);
+
+        // вернул как было. у меня не работала почему-то твоя версия
+        await walletWithProvider.sendTransaction({
+            to: to,
+            value: hre.ethers.parseEther(amount + "")
+        });
+    }
+
+    console.log(`[Node] Transfer ETH [${fromE18(await hre.ethers.provider.getBalance(to))}] to [${to}]`);
+}
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 module.exports = {
-    updateFeeData: updateFeedData
+    
 }
 
 

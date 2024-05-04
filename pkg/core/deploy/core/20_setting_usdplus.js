@@ -1,16 +1,15 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const {getContract, initWallet} = require("@overnight-contracts/common/utils/script-utils");
-const {Wallet} = require("zksync-web3");
+const {Wallet} = require("zksync-ethers");
 
-const hre = require('hardhat');
 module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
     const wallet = await initWallet();
 
-    const usdPlus = await ethers.getContract("UsdPlusToken", wallet);
-    const exchange = await ethers.getContract("Exchange", wallet);
+    const usdPlus = await hre.ethers.getContract("UsdPlusToken", wallet);
+    const exchange = await hre.ethers.getContract("Exchange", wallet);
     const roleManager = await getContract("RoleManager");
     const payoutManager = await getContract("ZkSyncPayoutManager");  // change for needed payout manager
 

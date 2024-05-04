@@ -1,5 +1,5 @@
 const {toE6, toE18} = require("@overnight-contracts/common/utils/decimals");
-const {getContract, showM2M, getCoreAsset, getWalletAddress} = require("@overnight-contracts/common/utils/script-utils");
+const {getContract, showM2M} = require("@overnight-contracts/common/utils/script-utils");
 
 async function main() {
 

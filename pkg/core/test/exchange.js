@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require('hardhat');
 const {toE6, fromE6, toE18, fromE18} = require("@overnight-contracts/common/utils/decimals");
 const hre = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
@@ -59,24 +58,24 @@ describe("Exchange", function () {
                 // need to run inside IDEA via node script running
                 await hre.run("compile");
 
-                await deployments.fixture(['TestExchange', 'ExchangeMultiCallWrapper', 'MockPayoutManager']);
+                await hre.deployments.fixture(['TestExchange', 'ExchangeMultiCallWrapper', 'MockPayoutManager']);
 
-                const {deployer} = await getNamedAccounts();
+                const {deployer} = await hre.getNamedAccounts();
                 account = deployer;
                 testAccount = await createRandomWallet();
 
-                exchange = await ethers.getContract("Exchange");
+                exchange = await hre.ethers.getContract("Exchange");
 
-                usdPlus = await ethers.getContract("UsdPlusToken");
-                pm = await ethers.getContract('MockPortfolioManager');
-                insurance = await ethers.getContract('MockInsuranceExchange');
-                asset = await ethers.getContract('AssetToken');
-                roleManager = await ethers.getContract('RoleManager');
-                payoutManager = await ethers.getContract('MockPayoutManager');
+                usdPlus = await hre.ethers.getContract("UsdPlusToken");
+                pm = await hre.ethers.getContract('MockPortfolioManager');
+                insurance = await hre.ethers.getContract('MockInsuranceExchange');
+                asset = await hre.ethers.getContract('AssetToken');
+                roleManager = await hre.ethers.getContract('RoleManager');
+                payoutManager = await hre.ethers.getContract('MockPayoutManager');
 
                 await exchange.setPayoutManager(payoutManager.address);
 
-                multiCallWrapper = await ethers.getContract('ExchangeMultiCallWrapper');
+                multiCallWrapper = await hre.ethers.getContract('ExchangeMultiCallWrapper');
 
                 if (decimal.rebase === 6) {
                     toRebase = toE6;

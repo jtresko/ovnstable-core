@@ -1,4 +1,4 @@
-const {ethers} = require("hardhat");
+onst hre = require("hardhat");
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
 const {COMMON} = require("@overnight-contracts/common/utils/assets");
 const {Roles} = require("@overnight-contracts/common/utils/roles");
@@ -27,12 +27,12 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     });
 
 
-    let usdPlus = await ethers.getContract('UsdPlusToken');
-    let asset = await ethers.getContract('AssetToken');
-    let insurance = await ethers.getContract('MockInsuranceExchange');
-    let pm = await ethers.getContract('MockPortfolioManager');
-    let exchange = await ethers.getContract('Exchange');
-    let roleManager = await ethers.getContract('RoleManager');
+    let usdPlus = await hre.ethers.getContract('UsdPlusToken');
+    let asset = await hre.ethers.getContract('AssetToken');
+    let insurance = await hre.ethers.getContract('MockInsuranceExchange');
+    let pm = await hre.ethers.getContract('MockPortfolioManager');
+    let exchange = await hre.ethers.getContract('Exchange');
+    let roleManager = await hre.ethers.getContract('RoleManager');
 
 
     await usdPlus.setExchanger(exchange.address);

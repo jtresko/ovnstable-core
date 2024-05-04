@@ -1,6 +1,5 @@
-const { ethers } = require("hardhat");
-const {getERC20, getDevWallet, transferUSDC} = require("@overnight-contracts/common/utils/script-utils");
-
+const hre = require("hardhat");
+const {getERC20, transferUSDC} = require("@overnight-contracts/common/utils/script-utils");
 let {getAsset} = require('@overnight-contracts/common/utils/assets');
 
 module.exports = async ({getNamedAccounts, deployments}) => {
@@ -16,15 +15,12 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
     let value = "9900000000000000000000000";
 
-    const buyonSwap = await ethers.getContract("BuyonSwap");
-    switch (process.env.STAND) {
+    const buyonSwap = await hre.ethers.getContract("BuyonSwap");
+    switch (process.env.stand) {
         case 'bsc':
             await buyonSwap.buy(getAsset('usdc'), getAsset('pancakeRouter'), {value: value});
             break;
         case 'polygon':
-            await buyonSwap.buy(getAsset('usdc'), getAsset('quickSwapRouter'), {value: value});
-            break;
-        case 'polygon_dev':
             await buyonSwap.buy(getAsset('usdc'), getAsset('quickSwapRouter'), {value: value});
             break;
         case 'optimism':

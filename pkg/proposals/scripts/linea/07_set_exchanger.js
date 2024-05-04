@@ -3,7 +3,6 @@ const { getContract, showM2M, execTimelock, initWallet } = require("@overnight-c
 const { createProposal, testProposal, testUsdPlus, testStrategy } = require("@overnight-contracts/common/utils/governance");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const path = require("path");
-const { ethers } = require("hardhat");
 const { LINEA } = require("@overnight-contracts/common/utils/assets");
 let filename = path.basename(__filename);
 filename = filename.substring(0, filename.indexOf(".js"));

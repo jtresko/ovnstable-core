@@ -4,22 +4,19 @@ const {
     getContract,
     initWallet,
     getPrice,
-    impersonateAccount,
     getWalletAddress,
     getCoreAsset,
     getERC20,
-    convertWeights,
     getChainId,
     transferAsset,
 } = require('./script-utils');
-const hre = require('hardhat');
+const hre = require("hardhat");
 const { execTimelock, showM2M, transferETH } = require('@overnight-contracts/common/utils/script-utils');
 const { createRandomWallet, getTestAssets, prepareEnvironment } = require('./tests');
 const { Roles } = require('./roles');
 const fs = require('fs');
 const { getEmptyOdosData } = require('./odos-helper');
 const { COMMON } = require('./assets');
-const ethers = hre.ethers;
 const proposalStates = ['Pending', 'Active', 'Canceled', 'Defeated', 'Succeeded', 'Queued', 'Expired', 'Executed'];
 const { platform } = process;
 
@@ -51,9 +48,7 @@ async function createProposal(name, addresses, values, abis) {
     }
 
     let batchName;
-    let stand = process.env.STAND;
-
-    stand = stand.split('_')[0];
+    let stand = process.env.stand;
 
     if (platform === 'win32') {
         batchName = `${appRoot}\\pkg\\proposals\\batches\\${stand}\\${name}.json`;
@@ -67,7 +62,7 @@ async function createProposal(name, addresses, values, abis) {
 }
 
 function createTransaction(timelock, delay, address, value, data) {
-    let salt = ethers.utils.solidityKeccak256(['uint256'], [new Date().getTime()]);
+    let salt = hre.ethers.solidityPackedKeccak256(['uint256'], [new Date().getTime()]);
 
     return {
         to: timelock.address,
@@ -120,8 +115,10 @@ function createTransaction(timelock, delay, address, value, data) {
     };
 }
 
-async function testUsdPlus(id, stand = process.env.STAND) {
+async function testUsdPlus(id) {
     console.log(`Run tests USD+`);
+
+    let stand = process.env.standtoken;
 
     await prepareEnvironment();
 
@@ -144,7 +141,7 @@ async function testUsdPlus(id, stand = process.env.STAND) {
 
     tables.push({
         name: 'BlockNumber',
-        result: await ethers.provider.getBlockNumber(),
+        result: await hre.ethers.provider.getBlockNumber(),
     });
 
     tables.push({
@@ -231,7 +228,8 @@ async function testCase(test, id) {
     }
 }
 
-async function testStrategy(id, strategy, stand = process.env.STAND) {
+async function testStrategy(id, strategy) {
+    let stand = process.env.standtoken;
     let asset = await getCoreAsset(stand);
     let walletAddress = await getWalletAddress();
     await transferETH(10, walletAddress, await getPrice());
@@ -251,7 +249,7 @@ async function testStrategy(id, strategy, stand = process.env.STAND) {
 
     tables.push({
         name: 'BlockNumber',
-        result: await ethers.provider.getBlockNumber(),
+        result: await hre.ethers.provider.getBlockNumber(),
     });
 
     tables.push({
@@ -358,7 +356,7 @@ async function getProposalState(proposalId) {
 
     console.log('StartBlock:     ' + data.startBlock);
     console.log('EndBlock:       ' + data.endBlock);
-    console.log('CurrentBlock:   ' + (await ethers.provider.getBlockNumber()));
+    console.log('CurrentBlock:   ' + (await hre.ethers.provider.getBlockNumber()));
     console.log('ForVotes:       ' + fromE18(data.forVotes));
 
     return state;

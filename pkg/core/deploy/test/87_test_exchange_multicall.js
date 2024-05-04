@@ -1,11 +1,10 @@
-const {ethers} = require("hardhat");
-
+const hre = require("hardhat");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
-    const exchange = await ethers.getContract("Exchange");
+    const exchange = await hre.ethers.getContract("Exchange");
 
     await deploy("ExchangeMultiCallWrapper", {
         from: deployer,

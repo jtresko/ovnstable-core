@@ -1,5 +1,4 @@
 const {expect} = require("chai");
-const {deployments, ethers, getNamedAccounts} = require('hardhat');
 const {toE6, fromE6, toE18, fromE18} = require("@overnight-contracts/common/utils/decimals");
 const hre = require("hardhat");
 const {resetHardhat, createRandomWallet} = require("@overnight-contracts/common/utils/tests");
@@ -36,15 +35,15 @@ describe("InsuranceExchangeIntegration", function () {
 
         sharedBeforeEach("deploy contracts", async () => {
             await hre.run("compile");
-            await resetHardhat(process.env.STAND);
+            await resetHardhat();
 
-            await deployments.fixture(['Insurance']);
+            await hre.deployments.fixture(['Insurance']);
 
-            const signers = await ethers.getSigners();
+            const signers = await hre.ethers.getSigners();
             account = signers[0];
 
-            insurance = (await ethers.getContract("InsuranceExchange")).connect(account);
-            rebase = (await ethers.getContract('InsuranceToken'));
+            insurance = (await hre.ethers.getContract("InsuranceExchange")).connect(account);
+            rebase = (await hre.ethers.getContract('InsuranceToken'));
             asset = (await getContract('Ovn')).connect(account);
             usdc = (await getERC20ByAddress(OPTIMISM.usdc)).connect(account);
 

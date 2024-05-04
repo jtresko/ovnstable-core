@@ -1,6 +1,5 @@
 const {expect} = require("chai");
 const chai = require("chai");
-const {deployments, ethers, getNamedAccounts, upgrades} = require("hardhat");
 const {resetHardhat} = require("@overnight-contracts/common/utils/tests");
 const hre = require("hardhat");
 let {getAsset} = require('@overnight-contracts/common/utils/assets');
@@ -31,14 +30,14 @@ describe("PortfolioManager set new cash strategy", function () {
     sharedBeforeEach(async () => {
         // need to run inside IDEA via node script running
         await hre.run("compile");
-        await resetHardhat(process.env.STAND);
+        await resetHardhat();
 
         const {deploy} = deployments;
         const {deployer} = await getNamedAccounts();
 
-        await deployments.fixture(['base', 'setting', 'test']);
+        await hre.deployments.fixture(['base', 'setting', 'test']);
 
-        asset = await ethers.getContractAt("ERC20", assetAddress);
+        asset = await hre.ethers.getContractAt("ERC20", assetAddress);
         mockCashStrategyA = await deploy("MockStrategy", {
             from: deployer,
             args: [assetAddress, 1],
@@ -52,7 +51,7 @@ describe("PortfolioManager set new cash strategy", function () {
             skipIfAlreadyDeployed: false
         });
 
-        let roleManager = await ethers.getContract('RoleManager');
+        let roleManager = await hre.ethers.getContract('RoleManager');
 
 
         pm = await deployContract("PortfolioManager")
@@ -149,14 +148,14 @@ describe("PortfolioManager: addStrategy", function () {
 
     sharedBeforeEach(async () => {
         await hre.run("compile");
-        await resetHardhat(process.env.STAND);
+        await resetHardhat();
 
         const {deploy} = deployments;
         const {deployer} = await getNamedAccounts();
 
         account = deployer;
 
-        await deployments.fixture([]);
+        await hre.deployments.fixture([]);
 
         notAdminUser = provider.createEmptyWallet();
         await transferETH(1, notAdminUser.address);
@@ -243,14 +242,14 @@ describe("PortfolioManager: removeStrategy", function () {
 
     sharedBeforeEach(async () => {
         await hre.run("compile");
-        await resetHardhat(process.env.STAND);
+        await resetHardhat();
 
         const {deploy} = deployments;
         const {deployer} = await getNamedAccounts();
 
         account = deployer;
 
-        await deployments.fixture([]);
+        await hre.deployments.fixture([]);
 
         notAdminUser = provider.createEmptyWallet();
         await transferETH(1, notAdminUser.address);
@@ -418,14 +417,14 @@ describe("PortfolioManager: setStrategyWeights", function () {
 
     sharedBeforeEach(async () => {
         await hre.run("compile");
-        await resetHardhat(process.env.STAND);
+        await resetHardhat();
 
         const {deploy} = deployments;
         const {deployer} = await getNamedAccounts();
 
         account = deployer;
 
-        await deployments.fixture([]);
+        await hre.deployments.fixture([]);
 
         notAdminUser = provider.createEmptyWallet();
         await transferETH(1, notAdminUser.address);
@@ -782,16 +781,16 @@ describe("PortfolioManager: Deposit/Withdraw", function () {
     sharedBeforeEach(async () => {
         // need to run inside IDEA via node script running
         await hre.run("compile");
-        await resetHardhat(process.env.STAND);
+        await resetHardhat();
 
         const {deploy} = deployments;
         const {deployer} = await getNamedAccounts();
         account = deployer;
 
-        await deployments.fixture(['test']);
+        await hre.deployments.fixture(['test']);
 
 
-        asset = await ethers.getContractAt("ERC20", assetAddress);
+        asset = await hre.ethers.getContractAt("ERC20", assetAddress);
         cashStrategy = await deploy("MockStrategy", {
             from: deployer,
             args: [assetAddress, 1],
@@ -805,8 +804,8 @@ describe("PortfolioManager: Deposit/Withdraw", function () {
             skipIfAlreadyDeployed: false
         });
 
-        const signers = await ethers.getSigners();
-        nonCashStrategy = await ethers.getContractAt('MockStrategy', nonCashStrategy.address, signers[0]);
+        const signers = await hre.ethers.getSigners();
+        nonCashStrategy = await hre.ethers.getContractAt('MockStrategy', nonCashStrategy.address, signers[0]);
 
         pm = await deployContract("PortfolioManager");
         let roleManager = await deployContract('RoleManager');
@@ -929,7 +928,7 @@ describe("PortfolioManager: Deposit/Withdraw", function () {
 });
 
 async function deployContract(name){
-    const factory = await ethers.getContractFactory(name);
+    const factory = await hre.ethers.getContractFactory(name);
     let contract = await upgrades.deployProxy(factory, {kind: 'uups'});
     await contract.deployTransaction.wait();
     await sampleModule.deployProxyImpl(hre, factory, {kind: 'uups'}, contract.address);

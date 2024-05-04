@@ -4,7 +4,6 @@ const { createProposal, testProposal, testUsdPlus, testStrategy } = require("@ov
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const { prepareEnvironment } = require("@overnight-contracts/common/utils/tests");
 const { strategySiloUsdc } = require("@overnight-contracts/strategies-arbitrum/deploy/38_strategy_silo_usdc");
-const { ethers } = require("hardhat");
 const path = require('path');
 let filename = path.basename(__filename);
 filename = filename.substring(0, filename.indexOf(".js"));

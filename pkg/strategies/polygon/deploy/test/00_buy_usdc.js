@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 
 let {POLYGON} = require('@overnight-contracts/common/utils/assets');
 
@@ -15,7 +15,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
     let value = "99000000000000000000000000";
 
-    const buyonSwap = await ethers.getContract("BuyonSwap");
+    const buyonSwap = await hre.ethers.getContract("BuyonSwap");
     await buyonSwap.buy(POLYGON.usdc, POLYGON.quickSwapRouter, {value: value});
 
     console.log('Buy usdc: ' + value);

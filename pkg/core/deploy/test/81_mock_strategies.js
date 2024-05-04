@@ -1,4 +1,4 @@
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 
 let {getAsset} = require('@overnight-contracts/common/utils/assets');
 
@@ -6,8 +6,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const {deploy} = deployments;
     const {deployer} = await getNamedAccounts();
 
-    const pm = await ethers.getContract("PortfolioManager");
-    const exchange = await ethers.getContract("Exchange");
+    const pm = await hre.ethers.getContract("PortfolioManager");
+    const exchange = await hre.ethers.getContract("Exchange");
 
     let asset = getAsset('usdc');
 

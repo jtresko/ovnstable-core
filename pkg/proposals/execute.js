@@ -1,36 +1,14 @@
 const hre = require("hardhat");
-const {
-    getContract,
-    showM2M,
-    execTimelock,
-    initWallet,
-    convertWeights,
-    getPrice,
-} = require("@overnight-contracts/common/utils/script-utils");
-const {
-    createProposal,
-    testProposal,
-    testUsdPlus,
-    testStrategy,
-} = require("@overnight-contracts/common/utils/governance");
-let { BSC } = require("@overnight-contracts/common/utils/assets");
-const { Roles } = require("@overnight-contracts/common/utils/roles");
-const { fromE6 } = require("@overnight-contracts/common/utils/decimals");
+const { getContract, initWallet } = require("@overnight-contracts/common/utils/script-utils");
 const fs = require("fs");
-const { ethers } = require("hardhat");
-const AGENT_TIMELOCK_ABI = require("@overnight-contracts/governance-new/scripts/abi/AGENT_TIMELOCK_ABI.json");
-
-const PREDECESSOR =
-    "0x0000000000000000000000000000000000000000000000000000000000000000";
+const AGENT_TIMELOCK_ABI = require("@overnight-contracts/governance/scripts/abi/AGENT_TIMELOCK_ABI.json");
+const PREDECESSOR = "0x0000000000000000000000000000000000000000000000000000000000000000";
 
 async function main() {
     let timelock = await getContract("AgentTimelock");
 
-    let network = hre.network.name;
-    if (network === "localhost") {
-        network = process.env.STAND;
-    }
-
+    let network = process.env.stand;
+    
     let name = "05_migrate_usdplus";
     let batch = JSON.parse(
         await fs.readFileSync(`./batches/${network}/${name}.json`),
@@ -49,7 +27,7 @@ async function main() {
         console.log(transaction);
     }
 
-    timelock = await ethers.getContractAt(
+    timelock = await hre.ethers.getContractAt(
         AGENT_TIMELOCK_ABI,
         timelock.address,
         await initWallet(),
@@ -75,15 +53,7 @@ async function main() {
         }
 
         if (timestamp > 1) {
-            await (
-                await timelock.execute(
-                    addresses[i],
-                    values[i],
-                    datas[i],
-                    PREDECESSOR,
-                    salt[i],
-                )
-            ).wait();
+            await (await timelock.execute(addresses[i], values[i], datas[i], PREDECESSOR, salt[i])).wait();
         }
     }
 }

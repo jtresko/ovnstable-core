@@ -1,5 +1,5 @@
 const {deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
-const {ethers} = require("hardhat");
+const hre = require("hardhat");
 const {POLYGON} = require("@overnight-contracts/common/utils/assets");
 
 module.exports = async ({deployments}) => {
@@ -21,7 +21,7 @@ module.exports = async ({deployments}) => {
 };
 
 async function impermaxQsUsdt(imxbToken, strategyName) {
-    const strategy = await ethers.getContract(strategyName);
+    const strategy = await hre.ethers.getContract(strategyName);
 
     await (await strategy.setTokens(POLYGON.usdc, POLYGON.usdt, imxbToken)).wait();
     await (await strategy.setParams(POLYGON.impermaxRouter, POLYGON.balancerVault, POLYGON.balancerPoolIdUsdcTusdDaiUsdt)).wait();

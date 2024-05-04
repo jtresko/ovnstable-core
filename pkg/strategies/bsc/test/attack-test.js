@@ -1,5 +1,4 @@
 const hre = require("hardhat");
-const {deployments, getNamedAccounts, ethers} = require("hardhat");
 const {resetHardhat, greatLess} = require("@overnight-contracts/common/utils/tests");
 const {toE6, toE18, fromAsset, fromE18, fromE6} = require("@overnight-contracts/common/utils/decimals");
 const {sharedBeforeEach} = require("@overnight-contracts/common/utils/sharedBeforeEach");
@@ -127,15 +126,15 @@ async function setUp(network, assetName, strategyName) {
     hre.ovn.tags = strategyName;
     hre.ovn.setting = true;
 
-    await deployments.fixture(['Attack' + strategyName, strategyName, 'test']);
+    await hre.deployments.fixture(['Attack' + strategyName, strategyName, 'test']);
 
-    const signers = await ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     const account = signers[0];
     const recipient = signers[1];
 
-    const attackStrategy = await ethers.getContract('Attack' + strategyName);
+    const attackStrategy = await hre.ethers.getContract('Attack' + strategyName);
 
-    const strategy = await ethers.getContract(strategyName);
+    const strategy = await hre.ethers.getContract(strategyName);
     await strategy.setPortfolioManager(recipient.address);
 
     let mainAddress = (await initWallet()).address;

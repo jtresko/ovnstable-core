@@ -1,6 +1,6 @@
 const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { OPTIMISM } = require("@overnight-contracts/common/utils/assets");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({ deployments }) => {
@@ -13,7 +13,7 @@ module.exports = async ({ deployments }) => {
         odosRouter: OPTIMISM.odosRouterV2,
     }
 
-    let zap = await ethers.getContract('DefiedgeZap');
+    let zap = await hre.ethers.getContract('DefiedgeZap');
     await (await zap.grantRole(Roles.DEFAULT_ADMIN_ROLE, '0x66BC0120b3287f08408BCC76ee791f0bad17Eeef')).wait();
 
     await (await zap.setParams(params)).wait();

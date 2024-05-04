@@ -1,5 +1,4 @@
-const { ethers } = require("hardhat");
-const { getContract, getPrice, transferETH, getWalletAddress } = require("@overnight-contracts/common/utils/script-utils");
+const { getContract, getPrice, transferETH } = require("@overnight-contracts/common/utils/script-utils");
 const { createSkim, createSkimTo, createSkimToWithFee, createBribe, createBribeWithFee, createSync, createCustomBribe, createCustom } = require("@overnight-contracts/common/utils/payoutListener");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const { COMMON } = require("@overnight-contracts/common/utils/assets");

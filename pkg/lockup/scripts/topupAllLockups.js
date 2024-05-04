@@ -1,5 +1,5 @@
 const { toE18, fromE18 } = require("@overnight-contracts/common/utils/decimals");
-const { ethers } = require('hardhat');
+const hre = require("hardhat");
 const { initWallet } = require("@overnight-contracts/common/utils/script-utils");
 
 const OVN_ABI = (require("./interfaces/ovn.json"));
@@ -29,7 +29,7 @@ async function main() {
     let addresses = DEV_ADDRESSES_LOCKUP;
     
     let wallet = await initWallet();
-    const token = new ethers.Contract(OVN_ABI.address, OVN_ABI.abi, wallet);
+    const token = new hre.ethers.Contract(OVN_ABI.address, OVN_ABI.abi, wallet);
     console.log("Owner OVN amount:", fromE18((await token.balanceOf(wallet.address)).toString()));
 
     for (const [lockupAddress, amount] of Object.entries(addresses)) {

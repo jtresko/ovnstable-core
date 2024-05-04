@@ -1,5 +1,4 @@
 const { expect } = require("chai");
-const { deployments, ethers, getNamedAccounts } = require("hardhat");
 const {
     transferAsset,
     getERC20,
@@ -203,18 +202,10 @@ function calculateProportionForPool(
 
 async function setUp(params) {
 
-    const signers = await ethers.getSigners();
+    const signers = await hre.ethers.getSigners();
     const account = signers[0];
 
-    let usdc;
-    if (process.env.STAND === 'base') {
-        usdc = await getERC20('usdbc');
-    } else {
-        usdc = await getERC20('usdc');
-    }
-
-    
-
+    let usdc = await getERC20('usdc');
 
     return {
         account: account,

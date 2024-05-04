@@ -1,6 +1,6 @@
 const { deployProxy } = require("@overnight-contracts/common/utils/deployProxy");
 const { BASE } = require("@overnight-contracts/common/utils/assets");
-const { ethers } = require("hardhat");
+const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 
 module.exports = async ({ deployments }) => {
@@ -8,7 +8,7 @@ module.exports = async ({ deployments }) => {
 
     let deployResult = await deployProxy('SwapBasedZap', deployments, save);
 
-    let zap = await ethers.getContract('SwapBasedZap');
+    let zap = await hre.ethers.getContract('SwapBasedZap');
     await (await zap.setParams(
         {
             swapBasedRouter: BASE.swapBasedRouter,
