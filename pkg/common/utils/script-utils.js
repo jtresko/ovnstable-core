@@ -70,7 +70,7 @@ async function deploySection(exec) {
 
         try {
             await exec(strategyName);
-            console.log(`[${strategyName}] deploy done`)
+            console.log(`[${strategyName}] deploy done`);
         } catch (e) {
             console.error(`[${strategyName}] deploy fail: ` + e);
         }
@@ -164,7 +164,9 @@ async function getContract(name, standtoken = process.env.standtoken) {
         let searchPath = fromDir(require('app-root-path').path, path.join(standtoken, name + ".json"));
         console.log(searchPath);
         let contractJson = JSON.parse(fs.readFileSync(searchPath));
-        return await hre.ethers.getContractAt(contractJson.abi, contractJson.address, wallet);
+        let contract = await hre.ethers.getContractAt(contractJson.abi, contractJson.address, wallet);
+        contract.address = await contract.getAddress();
+        return contract;
     } catch (e) {
         console.error(`Error: Could not find a contract named [${name}] in folder: [${standtoken}]`);
         throw new Error(e);
@@ -292,16 +294,10 @@ async function getStrategyMapping() {
     return strategiesMapping;
 }
 
-async function showM2M(stand = process.env.stand, blocknumber) {
+async function showM2M(stand = process.env.standtoken, blocknumber) {
 
     let m2m = await getContract('Mark2Market', stand);
-
-    let usdPlus;
-    if (stand.includes('_ins')) {
-        usdPlus = await getContract('InsuranceToken', stand);
-    } else {
-        usdPlus = await getContract('UsdPlusToken', stand);
-    }
+    let usdPlus = await getContract('UsdPlusToken', stand);
     let pm = await getContract('PortfolioManager', stand);
 
     let strategyAssets;
@@ -393,7 +389,7 @@ async function getPrice() {
 
 async function execTimelock(exec) {
 
-    let timelock = await getContract('AgentTimelock');
+    let timelock = (await getContract('AgentTimelock'));
     if (process.env.network === "localhost") {
         if (process.env.stand === "zksync") {
             hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
@@ -422,7 +418,7 @@ async function execTimelock(exec) {
 
 async function checkTimeLockBalance() {
 
-    let timelock = await getContract('AgentTimelock');  
+    let timelock = await getContract('AgentTimelock');
 
     const balance = await hre.ethers.provider.getBalance(timelock.address);
 

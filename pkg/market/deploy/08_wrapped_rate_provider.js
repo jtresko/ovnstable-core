@@ -17,12 +17,6 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
     console.log(`WrappedUsdPlusRateProvider deployed at ${rateProvider.address}`);
 
-    if (hre.ovn.verify){
-        await hre.run("verify:verify", {
-            address: rateProvider.address,
-            constructorArguments: [wrappedUsdPus.address],
-        });
-    }
 };
 
 module.exports.tags = ['WrappedUsdPlusRateProvider'];

@@ -14,14 +14,6 @@ module.exports = async ({deployments, getNamedAccounts}) => {
         log: true,
     });
 
-
-    if (hre.ovn.verify){
-        await hre.run("verify:verify", {
-            address: governor.address,
-            constructorArguments: [ovn.address, timelock.address ],
-        });
-    }
-
     console.log("OvnGovernor deployed at " + governor.address);
 
 };

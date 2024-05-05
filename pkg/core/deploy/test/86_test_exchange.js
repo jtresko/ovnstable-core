@@ -1,4 +1,4 @@
-onst hre = require("hardhat");
+const hre = require("hardhat");
 const {deployProxy, deployProxyMulti} = require("@overnight-contracts/common/utils/deployProxy");
 const {COMMON} = require("@overnight-contracts/common/utils/assets");
 const {Roles} = require("@overnight-contracts/common/utils/roles");

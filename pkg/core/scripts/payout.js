@@ -109,9 +109,7 @@ async function getOdosParams(exchange) {
     let asset = await hre.ethers.getContractAt("IERC20", await exchange.usdc());
     let ovn = await getContract('Ovn');
     let insurance = await getContract("InsuranceExchange");
-
-    ovn.address = ovn.target;
-    insurance.address = insurance.target;
+    
     console.log(1, ovn.address)
     console.log("ovnBefore", (await ovn.balanceOf(insurance.address)).toString());
     console.log(2)

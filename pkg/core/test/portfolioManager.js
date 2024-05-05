@@ -921,10 +921,7 @@ describe("PortfolioManager: Deposit/Withdraw", function () {
         await nonCashStrategy.setNavLess(true);
         await expectRevert(pm.withdraw(100), "PM: NAV less than expected");
 
-
     });
-
-
 });
 
 async function deployContract(name){

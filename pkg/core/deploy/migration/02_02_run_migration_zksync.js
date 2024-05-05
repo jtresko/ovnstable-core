@@ -9,7 +9,8 @@ const {
 const hre = require("hardhat");
 const { Roles } = require("@overnight-contracts/common/utils/roles");
 const { getImplementationAddress } = require("@openzeppelin/upgrades-core");
-import expect from require("chai");
+// import expect from require("chai");
+const {expect} = require("chai");
 const sampleModule = require("@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl");
 const {
     fromAsset,

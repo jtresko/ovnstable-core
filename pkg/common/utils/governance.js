@@ -1,5 +1,4 @@
 const { fromE18, toE18, fromAsset, fromE6, toAsset } = require('./decimals');
-const { expect } = require('chai');
 const {
     getContract,
     initWallet,

@@ -122,9 +122,6 @@ async function deployProxyZkSync(contractName, factoryName, deployments, save, p
 
         console.log(`Save ${implArtifact.contractName} to deployments`);
     }
-
-
-
 }
 
 async function deployProxyEth(contractName, factoryName, deployments, save, params) {
@@ -143,15 +140,9 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
 
     const contractFactory = await hre.ethers.getContractFactory(factoryName, factoryOptions);
 
-    // uncomment for force import
-    //    let proxyAddress = '';
-    //    await hre.upgrades.forceImport(proxyAddress, contractFactory, {
-    //        kind: 'uups',
-    //    });
-
     let proxy;
     try {
-        proxy = await hre.ethers.getContract(contractName);
+        proxy = await getContract(contractName);
     } catch (e) {
     }
 
@@ -163,42 +154,20 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
         });
         console.log(`Deploy ${contractName} Proxy progress -> ` + proxy.address + " tx: " + proxy.deployTransaction.hash);
         await proxy.deployTransaction.wait();
-    } else {
-        console.log(`Proxy ${contractName} found -> ` + proxy.address)
-    }
+        return;
+    } 
+    
+    let implAddress = await getImplementationAddress(hre.ethers.provider, proxy.address);
+    console.log(`Contract ${contractName} found -> proxy [${proxy.address}] impl [${implAddress}]`);
+    
+    implAddress = await hre.upgrades.deployImplementation(contractFactory, {
+        kind: 'uups',
+        unsafeAllow: unsafeAllow,
+        // unsafeSkipStorageCheck: true,
+        // unsafeAllowRenames: true
+    });
 
-    let impl;
-    let implAddress;
-    if (hre.ovn && !hre.ovn.impl) {
-        // Deploy a new implementation and upgradeProxy to new;
-        // You need have permission for role UPGRADER_ROLE;
-
-        try {
-            impl = await hre.upgrades.upgradeProxy(proxy, contractFactory, { unsafeAllow: unsafeAllow });
-        } catch (e) {
-            impl = await hre.upgrades.forceImport( proxy, contractFactory, { unsafeAllow: unsafeAllow })
-        }
-        implAddress = await getImplementationAddress(hre.ethers.provider, proxy.address);
-        console.log(`Deploy ${contractName} Impl  done -> proxy [` + proxy.address + "] impl [" + implAddress + "]");
-    } else {
-
-        //Deploy only a new implementation without call upgradeTo
-        //For system with Governance
-        console.log('Try to deploy impl ...');
-        impl = await sampleModule.deployProxyImpl(hre, contractFactory, {
-            kind: 'uups',
-            unsafeAllow: unsafeAllow,
-            // unsafeSkipStorageCheck: true,
-            // unsafeAllowRenames: true
-        }, proxy.address);
-
-        implAddress = impl.impl;
-        console.log('Deploy impl done without upgradeTo -> impl [' + implAddress + "]");
-    }
-
-
-    if (impl && impl.deployTransaction)
-        await impl.deployTransaction.wait();
+    console.log(`Deploy new impl -> impl [${implAddress}]`);
 
     const artifact = await deployments.getExtendedArtifact(factoryName);
     artifact.implementation = implAddress;
@@ -209,53 +178,25 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
 
     await save(contractName, proxyDeployments);
 
-
-    // Enable verification contract after deploy
-    if (hre.ovn.verify) {
-
-        console.log(`Verify proxy [${proxy.address}] ....`);
-
-        try {
-            await hre.run("verify:verify", {
-                address: proxy.address,
-                constructorArguments: args,
-            });
-        } catch (e) {
-            console.log(e);
-        }
-
-
-        console.log(`Verify impl [${implAddress}] ....`);
-
-        await hre.run("verify:verify", {
-            address: implAddress,
-            constructorArguments: [],
-        });
-    }
-
     if (hre.ovn.gov) {
-
         let timelock = await getContract('AgentTimelock');
-        if (isZkSync()) {
-            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8011')
-        } else {
-            hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
-        }
+        
+        // don't know why it is needed
+        hre.ethers.provider = new hre.ethers.JsonRpcProvider('http://localhost:8545')
+        
         await hre.network.provider.request({
             method: "hardhat_impersonateAccount",
             params: [timelock.address],
         });
 
         const timelockAccount = await hre.ethers.getSigner(timelock.address);
-
         await checkTimeLockBalance();
+        await proxy.connect(timelockAccount).upgradeTo(implAddress);
 
-        let contract = await getContract(contractName);
-        await contract.connect(timelockAccount).upgradeTo(impl.impl);
-
-        console.log(`[Gov] upgradeTo completed `)
+        console.log(`[Gov] upgradeTo completed`);
+    } else if (!hre.ovn.impl) {
+        await proxy.upgradeTo(implAddress);
     }
-
 
     return proxyDeployments;
 }

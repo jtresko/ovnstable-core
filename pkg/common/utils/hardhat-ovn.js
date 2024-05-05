@@ -1,4 +1,3 @@
-console.log("--run hardhat-ovn.js");
 const { task } = require("hardhat/config");
 const fs = require('fs');
 const fse = require('fs-extra');
@@ -11,25 +10,14 @@ const { Provider, Wallet } = require("zksync-ethers");
 task('deploy', 'deploy')
     .addFlag('noDeploy', 'Deploy contract|Upgrade proxy')
     .addFlag('setting', 'Run setting contract')
-    .addFlag('impl', 'Deploy only implementation without upgradeTo')
-    .addFlag('verify', 'Enable verify contracts')
     .addFlag('gov', 'Deploy to local by impression account')
+    .addFlag('impl', 'Deploy only implementation without upgradeTo')
     .addOptionalParam('stand', 'Override env STAND')
-    .addOptionalParam('id', 'ETS ID')
+    .addOptionalParam('token', 'Override env STAND')
     .setAction(async (args, hre) => {
 
-        hre.ovn = {
-            noDeploy: args.noDeploy,
-            deploy: !args.noDeploy,
-            setting: args.setting,
-            impl: args.impl,
-            verify: args.verify,
-            tags: args.tags,
-            gov: args.gov,
-            stand: args.stand,
-            id: args.id
-        }
-
+        hre.ovn = args;
+    
         // updateFeeData(hre);//todo return
 
         if (args.reset)
@@ -52,6 +40,8 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
     .addOptionalParam('block', 'Override env STAND')
     .addFlag('last', 'Use last block from RPC')
     .setAction(async (args, hre, runSuper) => {
+        
+        hre.ovn = args;
 
         const srcDir = `deployments/` + process.env.stand;
 
@@ -115,7 +105,7 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
         args.noDeploy = true;
 
         // need to fix problem "The node was not configured with a hardfork activation history."
-        await transferETH(1, "0x0000000000000000000000000000000000000000");
+        await transferETH(10, "0xcd8562CD85fD93C7e2E80B4Cf69097E5562a76f9");
         console.log('node', args);
         await runSuper(args);
     });
@@ -126,6 +116,8 @@ task(TASK_RUN, 'Run task')
     .addOptionalParam('stand', 'Override env STAND')
     .addOptionalParam('token', 'Override env STAND')
     .setAction(async (args, hre, runSuper) => {
+        
+        hre.ovn = args;
     
         if (args.reset)
             await evmCheckpoint('task', hre.network.provider);
@@ -142,7 +134,7 @@ task(TASK_RUN, 'Run task')
 task(TASK_COMPILE, 'Compile')
     .addOptionalParam('stand', 'Override env STAND')
     .setAction(async (args, hre, runSuper) => {
-        args.quiet = true;
+        // hre.ovn = args;
         await runSuper(args);
     });
 
@@ -151,7 +143,8 @@ task(TASK_TEST, 'test')
     .addOptionalParam('stand', 'Override env STAND')
     .addOptionalParam('id', 'ETS ID')
     .setAction(async (args, hre, runSuper) => {
-
+        
+        hre.ovn = args;
 
         // enable full deploys
         hre.ovn = {
@@ -182,7 +175,9 @@ task(TASK_TEST, 'test')
 task('simulate', 'Simulate transaction on local node')
     .addParam('hash', 'Hash transaction')
     .addOptionalParam('stand', 'Stand')
-    .setAction(async (args, hre, runSuper) => {
+    .setAction(async (args, hre) => {
+        
+        hre.ovn = args;
 
         let hash = args.hash;
 
@@ -244,7 +239,7 @@ task('simulateByData', 'Simulate transaction on local node')
     .addParam('from', 'from')
     .addParam('to', 'to')
     .addParam('data', 'data')
-    .setAction(async (args, hre, runSuper) => {
+    .setAction(async (args, hre) => {
 
         let from = args.from;
         let to = args.to;
