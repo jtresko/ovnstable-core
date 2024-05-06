@@ -43,37 +43,11 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
         
         hre.ovn = args;
 
-        const srcDir = `deployments/` + process.env.stand;
+        const srcDir = "deployments/" + process.env.standtoken;
+        const destDir = "deployments/localhost";
 
-        console.log(`[Node] stand: ${process.env.stand}`);
-        console.log(`[Node] network: ${process.env.network}`);
-
-        let chainId = fs.readFileSync(srcDir + "/.chainId", { flag: 'r' });
-        chainId = (chainId + "").trim();
-        let fileName;
-        if (Number.parseInt(chainId) === 137) {
-            fileName = 'polygon.json';
-        } else if (Number.parseInt(chainId) === 10) {
-            fileName = 'optimism.json';
-        } else if (Number.parseInt(chainId) === 56) {
-            fileName = 'bsc.json';
-        } else {
-            fileName = `unknown-${chainId}.json`;
-        }
-
-        await fs.copyFile(`.openzeppelin/${fileName}`, '.openzeppelin/unknown-31337.json', (e) => {
-            if (e)
-                console.error(e)
-        });
-
-        const destDir = `deployments/localhost`;
-
-        await fse.removeSync(destDir);
-
-        await fse.copySync(srcDir, destDir, { overwrite: true }, function (err) {
-            if (err)
-                console.error(err);
-        });
+        await fse.removeSync(destDir);  
+        await fse.copySync(srcDir, destDir);
 
         await fs.writeFile('deployments/localhost/.chainId', '31337', function (err) {
             if (err) return console.log(err);
@@ -106,7 +80,6 @@ task(TASK_NODE, 'Starts a JSON-RPC server on top of Hardhat EVM')
 
         // need to fix problem "The node was not configured with a hardfork activation history."
         await transferETH(10, "0xcd8562CD85fD93C7e2E80B4Cf69097E5562a76f9");
-        console.log('node', args);
         await runSuper(args);
     });
 

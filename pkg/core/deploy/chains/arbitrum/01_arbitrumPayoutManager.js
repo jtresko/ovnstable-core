@@ -8,7 +8,7 @@ module.exports = async ({deployments}) => {
     const {save} = deployments;
     await deployProxy('ArbitrumPayoutManager', deployments, save);
 
-    if (hre.ovn && hre.ovn.setting) {
+    if (hre.ovn.setting) {
 
         let roleManager = await hre.ethers.getContract('RoleManager');
         let payoutManager = await hre.ethers.getContract('ArbitrumPayoutManager');

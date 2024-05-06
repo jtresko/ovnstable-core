@@ -1,16 +1,12 @@
 const hre = require("hardhat");
 const { getImplementationAddress } = require('@openzeppelin/upgrades-core');
-const sampleModule = require('@openzeppelin/hardhat-upgrades/dist/utils/deploy-impl');
 const { getContract, checkTimeLockBalance, initWallet, sleep, getPrice } = require("./script-utils");
 const { Deployer } = require("@matterlabs/hardhat-zksync-deploy");
 const { isZkSync } = require("./network");
 
 async function deployProxy(contractName, deployments, save, params) {
-
     if (isZkSync()) {
-
         params = params ? params : {};
-
         return deployProxyZkSync(contractName, contractName, deployments, save, params);
     } else {
         return deployProxyEth(contractName, contractName, deployments, save, params);
@@ -18,17 +14,13 @@ async function deployProxy(contractName, deployments, save, params) {
 }
 
 async function deployProxyMulti(contractName, factoryName, deployments, save, params) {
-
     if (isZkSync()) {
-
         params = params ? params : {};
-
         return deployProxyZkSync(contractName, factoryName, deployments, save, params);
     } else {
         return deployProxyEth(contractName, factoryName, deployments, save, params);
     }
 }
-
 
 /**
  * Chain ZkSync not support by OpenZeppelin plugin for deploy proxy contracts.
@@ -48,9 +40,6 @@ async function deployProxyMulti(contractName, factoryName, deployments, save, pa
  */
 
 async function deployProxyZkSync(contractName, factoryName, deployments, save, params) {
-
-    if (hre.ovn === undefined)
-        hre.ovn = {};
 
     const deployer = new Deployer(hre, await initWallet());
 
@@ -79,12 +68,10 @@ async function deployProxyZkSync(contractName, factoryName, deployments, save, p
         // let price = await getPrice();
         // Execute this method can be not working when test it on local node
 
-
         if (!hre.ovn.impl) {
             await (await proxy.upgradeTo(implContract.address)).wait();
             console.log(`${contractName}: Proxy ${proxy.address} upgradeTo ${implContract.address}`);
         }
-
 
         await save(contractName, {
             address: proxy.address,
@@ -125,9 +112,6 @@ async function deployProxyZkSync(contractName, factoryName, deployments, save, p
 }
 
 async function deployProxyEth(contractName, factoryName, deployments, save, params) {
-
-    if (hre.ovn === undefined)
-        hre.ovn = {};
 
     let factoryOptions;
     let unsafeAllow;
@@ -200,7 +184,6 @@ async function deployProxyEth(contractName, factoryName, deployments, save, para
 
     return proxyDeployments;
 }
-
 
 module.exports = {
     deployProxy: deployProxy,

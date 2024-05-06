@@ -32,8 +32,6 @@ async function initWallet() {
 }
 
 async function findEvent(receipt, abi, eventName) {
-
-
     for (let value of receipt.logs) {
         try {
             let log = abi.interface.parseLog(value);
@@ -41,12 +39,9 @@ async function findEvent(receipt, abi, eventName) {
             if (log.name === eventName) {
                 return log;
             }
-        } catch (e) {
-        }
+        } catch (e) {}
     }
-
     return null;
-
 }
 
 async function getWalletAddress() {
@@ -60,9 +55,6 @@ async function getWalletAddress() {
 }
 
 async function deploySection(exec) {
-
-    if (hre.ovn === undefined)
-        hre.ovn = {};
 
     if (!hre.ovn.noDeploy) {
 
@@ -78,9 +70,6 @@ async function deploySection(exec) {
 }
 
 async function settingSection(id, exec) {
-
-    if (hre.ovn === undefined)
-        hre.ovn = {};
 
     if (hre.ovn.setting) {
 
@@ -126,7 +115,6 @@ async function settingSection(id, exec) {
         } catch (e) {
             console.error(`[${strategyName}] setting fail: ` + e);
         }
-
     }
 }
 
@@ -147,7 +135,6 @@ async function setDepositor(strategyName, strategy) {
 }
 
 async function isContract(address) {
-
     try {
         const code = await hre.ethers.provider.getCode(address);
         if (code !== '0x') return true;
@@ -257,7 +244,6 @@ async function getCoreAsset() {
 
 function fromDir(startPath, filter) {
 
-
     if (!fs.existsSync(startPath)) {
         console.log("no dir ", startPath);
         return;
@@ -312,7 +298,6 @@ async function showM2M(stand = process.env.standtoken, blocknumber) {
         totalNetAssets = await m2m.totalNetAssets();
         strategyWeights = await pm.getAllStrategyWeights();
     }
-
 
     let strategiesMapping = await getStrategyMapping();
 
@@ -425,7 +410,6 @@ async function checkTimeLockBalance() {
     if (new BN(balance.toString()).lt(new BN("10000000000000000000"))) {
         await transferETH(10, timelock.address);
     }
-
 }
 
 async function getChainId() {
