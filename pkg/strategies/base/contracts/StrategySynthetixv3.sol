@@ -75,7 +75,7 @@ contract StrategySynthetixV3 is Strategy {
 
         usdcToken.approve(address(wrapperModule), _amount);
 
-        wrapperModule.wrap(marketId, _amount, );
+        wrapperModule.wrap(marketId, _amount, _convertUsdcToSusdc(_amount));
     }
 
     function _unstake(
@@ -167,6 +167,14 @@ contract StrategySynthetixV3 is Strategy {
         }
 
         return totalUsdc;
+    }
+
+    function _convertUsdcToSusdc(uint256 amount) internal returns (uint256) {
+        return amount * 10**(susdToken.decimals()) / (10 ** usdcToken.decimals());
+    }
+
+    function _convertSusdcToUsdc(uint256 amount) internal returns (uint256) {
+        return amount * 10**(usdcToken.decimals()) / (10 ** susdToken.decimals());
     }
 
 }
