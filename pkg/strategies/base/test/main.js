@@ -1,6 +1,7 @@
 const { strategyTest } = require('@overnight-contracts/common/utils/strategy-test');
+const { strategyTestSynthetix } = require('@overnight-contracts/common/utils/strategy-test-synthetix');
 const { impersonatingEtsGrantRole, impersonatingStaker } = require("@overnight-contracts/common/utils/tests");
-const {Wallets} = require("@overnight-contracts/common/utils/wallets");
+const { Wallets } = require("@overnight-contracts/common/utils/wallets");
 
 async function runStrategyLogic(strategyName, strategyAddress) {
 
@@ -26,11 +27,14 @@ describe("BASE", function () {
         case 'base_dai':
             strategyTest(params, 'BASE', 'dai', runStrategyLogic);
             break;
-        case 'base_usdc':
-            strategyTest(params, 'BASE', 'usdc', runStrategyLogic);
-            break;
         default:
-            strategyTest(params, 'BASE', 'usdbc', runStrategyLogic);
+            if (params.name.indexOf('SynthetixV3') !== -1) {
+                params.unstakeDelay = 86600;
+                strategyTestSynthetix(params, 'BASE', 'usdc', runStrategyLogic)
+
+            } else {
+                strategyTest(params, 'BASE', 'usdc', runStrategyLogic);
+            }
             break;
     }
 });

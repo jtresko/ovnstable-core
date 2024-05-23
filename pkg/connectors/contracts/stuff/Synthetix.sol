@@ -14,119 +14,37 @@ library OrderFees {
     }
 }
 
-interface IWrapperModule {
-    /**
-     * @notice Thrown when a trade doesn't meet minimum expected return amount.
-     */
-    error InsufficientAmountReceived(uint256 expected, uint256 current);
-
-    /**
-     * @notice Gets fired when wrapper supply is set for a given market, collateral type.
-     * @param synthMarketId Id of the market the wrapper is initialized for.
-     * @param wrapCollateralType the collateral used to wrap the synth.
-     * @param maxWrappableAmount the local supply cap for the wrapper.
-     */
-    event WrapperSet(
-        uint256 indexed synthMarketId,
-        address indexed wrapCollateralType,
-        uint256 maxWrappableAmount
-    );
-
-    /**
-     * @notice Used to set the wrapper supply cap for a given market and collateral type.
-     * @dev If the supply cap is set to 0 or lower than the current outstanding supply, then the wrapper is disabled.
-     * @dev There is a synthetix v3 core system supply cap also set. If the current supply becomes higher than either the core system supply cap or the local market supply cap, wrapping will be disabled.
-     * @param marketId Id of the market to enable wrapping for.
-     * @param wrapCollateralType The collateral being used to wrap the synth.
-     * @param maxWrappableAmount The maximum amount of collateral that can be wrapped.
-     */
-    function setWrapper(
-        uint128 marketId,
-        address wrapCollateralType,
-        uint256 maxWrappableAmount
+interface ICoreProxy {
+    function deposit(
+        uint128 accountId,
+        address collateralType,
+        uint256 tokenAmount
     ) external;
 
-    /**
-     * @notice Used to get the wrapper supply cap for a given market and collateral type.
-     * @param marketId Id of the market to enable wrapping for.
-     * @return wrapCollateralType The collateral being used to wrap the synth.
-     * @return maxWrappableAmount The maximum amount of collateral that can be wrapped.
-     */
-    function getWrapper(
-        uint128 marketId
-    ) external view returns (address wrapCollateralType, uint256 maxWrappableAmount);
-
-    /**
-     * @notice Wraps the specified amount and returns similar value of synth minus the fees.
-     * @dev Fees are collected from the user by way of the contract returning less synth than specified amount of collateral.
-     * @param marketId Id of the market used for the trade.
-     * @param wrapAmount Amount of collateral to wrap.  This amount gets deposited into the market collateral manager.
-     * @param minAmountReceived The minimum amount of synths the trader is expected to receive, otherwise the transaction will revert.
-     * @return amountToMint Amount of synth returned to user.
-     * @return fees breakdown of all fees. in this case, only wrapper fees are returned.
-     */
-    function wrap(
-        uint128 marketId,
-        uint256 wrapAmount,
-        uint256 minAmountReceived
-    ) external returns (uint256 amountToMint, OrderFees.Data memory fees);
-
-    /**
-     * @notice Unwraps the synth and returns similar value of collateral minus the fees.
-     * @dev Transfers the specified synth, collects fees through configured fee collector, returns collateral minus fees to trader.
-     * @param marketId Id of the market used for the trade.
-     * @param unwrapAmount Amount of synth trader is unwrapping.
-     * @param minAmountReceived The minimum amount of collateral the trader is expected to receive, otherwise the transaction will revert.
-     * @return returnCollateralAmount Amount of collateral returned.
-     * @return fees breakdown of all fees. in this case, only wrapper fees are returned.
-     */
-    function unwrap(
-        uint128 marketId,
-        uint256 unwrapAmount,
-        uint256 minAmountReceived
-    ) external returns (uint256 returnCollateralAmount, OrderFees.Data memory fees);
-}
-
-interface IVaultModule {
-    /**
-     * @notice Thrown when attempting to delegate collateral to a vault with a leverage amount that is not supported by the system.
-     */
-    error InvalidLeverage(uint256 leverage);
-
-    /**
-     * @notice Thrown when attempting to delegate collateral to a market whose capacity is locked.
-     */
-    error CapacityLocked(uint256 marketId);
-
-    /**
-     * @notice Thrown when the specified new collateral amount to delegate to the vault equals the current existing amount.
-     */
-    error InvalidCollateralAmount();
-
-    /**
-     * @notice Emitted when {sender} updates the delegation of collateral in the specified liquidity position.
-     * @param accountId The id of the account whose position was updated.
-     * @param poolId The id of the pool in which the position was updated.
-     * @param collateralType The address of the collateral associated to the position.
-     * @param amount The new amount of the position, denominated with 18 decimals of precision.
-     * @param leverage The new leverage value of the position, denominated with 18 decimals of precision.
-     * @param sender The address that triggered the update of the position.
-     */
-    event DelegationUpdated(
-        uint128 indexed accountId,
-        uint128 indexed poolId,
+    function withdraw(
+        uint128 accountId,
         address collateralType,
-        uint256 amount,
-        uint256 leverage,
-        address indexed sender
-    );
+        uint256 tokenAmount
+    ) external;
+
+    function claimRewards(
+        uint128 accountId,
+        uint128 poolId,
+        address collateralType,
+        address distributor
+    ) external returns(uint256);
+
+    function getAccountAvailableCollateral(
+        uint128 accountId,
+        address collateralType
+    ) external view returns(uint256);
 
     /**
      * @notice Updates an account's delegated collateral amount for the specified pool and collateral type pair.
      * @param accountId The id of the account associated with the position that will be updated.
      * @param poolId The id of the pool associated with the position.
      * @param collateralType The address of the collateral used in the position.
-     * @param amount The new amount of collateral delegated in the position, denominated with 18 decimals of precision.
+     * @param newCollateralAmountD18 The new amount of collateral delegated in the position, denominated with 18 decimals of precision.
      * @param leverage The new leverage amount used in the position, denominated with 18 decimals of precision.
      *
      * Requirements:
@@ -141,7 +59,7 @@ interface IVaultModule {
         uint128 accountId,
         uint128 poolId,
         address collateralType,
-        uint256 amount,
+        uint256 newCollateralAmountD18,
         uint256 leverage
     ) external;
 
@@ -182,13 +100,13 @@ interface IVaultModule {
      * @param accountId The id of the account being queried.
      * @param poolId The id of the pool in which the account's position is held.
      * @param collateralType The address of the collateral used in the queried position.
-     * @return collateralAmountD18 The amount of collateral used in the position, denominated with 18 decimals of precision.
+     * @return amount The amount of collateral used in the position, denominated with 18 decimals of precision.
      */
     function getPositionCollateral(
         uint128 accountId,
         uint128 poolId,
         address collateralType
-    ) external view returns (uint256 collateralAmountD18);
+    ) external view returns (uint256 amount);
 
     /**
      * @notice Returns all information pertaining to a specified liquidity position in the vault module.
@@ -250,85 +168,6 @@ interface IVaultModule {
         uint128 poolId,
         address collateralType
     ) external returns (uint256 ratioD18);
-}
-
-/**
- * @title Module for managing accounts.
- * @notice Manages the system's account token NFT. Every user will need to register an account before being able to interact with the system.
- */
-interface IAccountModule {
-    /**
-     * @notice Thrown when the account interacting with the system is expected to be the associated account token, but is not.
-     */
-    error OnlyAccountTokenProxy(address origin);
-
-    /**
-     * @notice Thrown when an account attempts to renounce a permission that it didn't have.
-     */
-    error PermissionNotGranted(uint128 accountId, bytes32 permission, address user);
-
-    /**
-     * @notice Thrown when the requested account ID is greater or equal to type(uint128).max / 2
-     */
-    error InvalidAccountId(uint128 accountId);
-
-    /**
-     * @notice Emitted when an account token with id `accountId` is minted to `sender`.
-     * @param accountId The id of the account.
-     * @param owner The address that owns the created account.
-     */
-    event AccountCreated(uint128 indexed accountId, address indexed owner);
-
-    /**
-     * @notice Emitted when `user` is granted `permission` by `sender` for account `accountId`.
-     * @param accountId The id of the account that granted the permission.
-     * @param permission The bytes32 identifier of the permission.
-     * @param user The target address to whom the permission was granted.
-     * @param sender The Address that granted the permission.
-     */
-    event PermissionGranted(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
-    );
-
-    /**
-     * @notice Emitted when `user` has `permission` renounced or revoked by `sender` for account `accountId`.
-     * @param accountId The id of the account that has had the permission revoked.
-     * @param permission The bytes32 identifier of the permission.
-     * @param user The target address for which the permission was revoked.
-     * @param sender The address that revoked the permission.
-     */
-    event PermissionRevoked(
-        uint128 indexed accountId,
-        bytes32 indexed permission,
-        address indexed user,
-        address sender
-    );
-
-    /**
-     * @dev Data structure for tracking each user's permissions.
-     */
-    struct AccountPermissions {
-        /**
-         * @dev The address for which all the permissions are granted.
-         */
-        address user;
-        /**
-         * @dev The array of permissions given to the associated address.
-         */
-        bytes32[] permissions;
-    }
-
-    /**
-     * @notice Returns an array of `AccountPermission` for the provided `accountId`.
-     * @param accountId The id of the account whose permissions are being retrieved.
-     * @return accountPerms An array of AccountPermission objects describing the permissions granted to the account.
-     */
-    function getAccountPermissions(
-        uint128 accountId
-    ) external view returns (AccountPermissions[] memory accountPerms);
 
     /**
      * @notice Mints an account token with id `requestedAccountId` to `ERC2771Context._msgSender()`.
@@ -444,4 +283,27 @@ interface IAccountModule {
      * @return timestamp The unix timestamp of the last time a permissioned action occured with the account
      */
     function getAccountLastInteraction(uint128 accountId) external view returns (uint256 timestamp);
+}
+
+
+interface IWrapperModule {
+
+    function unwrap(
+        uint128 marketId,
+        uint256 unwrapAmount,
+        uint256 minAmountReceived
+    ) external returns (
+        uint256 returnCollateralAmount,
+        OrderFees.Data memory fees
+    );
+
+    function wrap(
+        uint128 marketId,
+        uint256 wrapAmount,
+        uint256 minAmountReceived
+    ) external returns (
+        uint256 amountToMint,
+        OrderFees.Data memory fees
+    );
+
 }
