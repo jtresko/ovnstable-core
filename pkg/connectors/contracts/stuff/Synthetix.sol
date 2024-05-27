@@ -78,20 +78,7 @@ interface ICoreProxy {
         address collateralType
     ) external returns (uint256 ratioD18);
 
-    /**
-     * @notice Returns the debt of the specified liquidity position. Credit is expressed as negative debt.
-     * @dev This is not a view function, and actually updates the entire debt distribution chain.
-     * @dev Call this function using `callStatic` to treat it as a view function.
-     * @param accountId The id of the account being queried.
-     * @param poolId The id of the pool in which the account's position is held.
-     * @param collateralType The address of the collateral used in the queried position.
-     * @return debtD18 The amount of debt held by the position, denominated with 18 decimals of precision.
-     */
-    function getPositionDebt(
-        uint128 accountId,
-        uint128 poolId,
-        address collateralType
-    ) external returns (int256 debtD18);
+    function getPositionDebt(uint128 accountId, uint128 poolId, address collateralType) external returns (int256 debt);
 
     /**
      * @notice Returns the amount of the collateral associated with the specified liquidity position.
@@ -108,27 +95,34 @@ interface ICoreProxy {
         address collateralType
     ) external view returns (uint256 amount);
 
+
+    function burnUsd(uint128 accountId, uint128 poolId, address collateralType, uint256 amount) external;
+
+    
+    function mintUsd(uint128 accountId, uint128 poolId, address collateralType, uint256 amount) external;
+
     /**
      * @notice Returns all information pertaining to a specified liquidity position in the vault module.
      * @param accountId The id of the account being queried.
      * @param poolId The id of the pool in which the account's position is held.
      * @param collateralType The address of the collateral used in the queried position.
-     * @return collateralAmountD18 The amount of collateral used in the position, denominated with 18 decimals of precision.
-     * @return collateralValueD18 The value of the collateral used in the position, denominated with 18 decimals of precision.
-     * @return debtD18 The amount of debt held in the position, denominated with 18 decimals of precision.
-     * @return collateralizationRatioD18 The collateralization ratio of the position (collateral / debt), denominated with 18 decimals of precision.
+     * @return collateralAmount The amount of collateral used in the position, denominated with 18 decimals of precision.
+     * @return collateralValue The value of the collateral used in the position, denominated with 18 decimals of precision.
+     * @return debt The amount of debt held in the position, denominated with 18 decimals of precision.
+     * @return collateralizationRatio The collateralization ratio of the position (collateral / debt), denominated with 18 decimals of precision.
      **/
     function getPosition(
         uint128 accountId,
         uint128 poolId,
         address collateralType
-    )
-        external
+    ) 
+        external 
+        view 
         returns (
-            uint256 collateralAmountD18,
-            uint256 collateralValueD18,
-            int256 debtD18,
-            uint256 collateralizationRatioD18
+            uint256 collateralAmount,
+            uint256 collateralValue,
+            int256 debt,
+            uint256 collateralizationRatio
         );
 
     /**
@@ -181,6 +175,20 @@ interface ICoreProxy {
      * Emits a {AccountCreated} event.
      */
     function createAccount(uint128 requestedAccountId) external;
+
+    
+    /**
+     * @notice Mints an account token with id `requestedAccountId` to `ERC2771Context._msgSender()`.
+     * @param requestedAccountId The id requested for the account being created. Reverts if id already exists.
+     *
+     * Requirements:
+     *
+     * - `requestedAccountId` must not already be minted.
+     * - `requestedAccountId` must be less than type(uint128).max / 2
+     *
+     * Emits a {AccountCreated} event.
+     */
+    function createAccount0(uint128 requestedAccountId) external;
 
     /**
      * @notice Mints an account token with an available id to `ERC2771Context._msgSender()`.

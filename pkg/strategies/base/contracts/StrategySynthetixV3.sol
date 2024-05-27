@@ -5,10 +5,11 @@ import "@overnight-contracts/core/contracts/Strategy.sol";
 
 import "@overnight-contracts/connectors/contracts/stuff/Synthetix.sol";
 import {AerodromeLibrary} from "@overnight-contracts/connectors/contracts/stuff/Aerodrome.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
 import "hardhat/console.sol";
 
-contract StrategySynthetixV3 is Strategy {
+contract StrategySynthetixV3 is Strategy,IERC721Receiver {
 
     IERC20 public usdcToken;
     IERC20 public susdcToken;
@@ -44,7 +45,6 @@ contract StrategySynthetixV3 is Strategy {
         uint128 poolId;
         address distributorSnx;
         address poolSnxUsdc;
-        uint128 accountId;
     }
 
 
@@ -75,19 +75,9 @@ contract StrategySynthetixV3 is Strategy {
         
         usdcDecimals = 10 ** IERC20Metadata(params.usdcToken).decimals();
         susdcDecimals = 10 ** IERC20Metadata(params.susdcToken).decimals();
-        console.log("usdcBalance", usdcToken.balanceOf(address(this)));
+
+        accountId = 170141183460469231731687303715884106674;//synthetixCoreRouter.createAccount();
         
-        usdcToken.approve(address(wrapperModule), 1000000);
-        console.log("usdcBalance", usdcToken.balanceOf(address(this)));
-
-        uint256 susdcAmountMin = _convertUsdcToSusdc(1000000);
-        console.log("susdcAmountMin", susdcAmountMin);
-
-        wrapperModule.wrap(marketId, 1000000, susdcAmountMin);
-
-        synthetixCoreRouter.createAccount(params.accountId);
-
-        accountId = params.accountId;
 
         emit StrategyUpdatedParams();
     }
@@ -134,6 +124,23 @@ contract StrategySynthetixV3 is Strategy {
         console.log("end _stake");
     }
 
+    function prepareClaimUsd() external onlyAdmin {
+        int256 currentDebt = synthetixCoreRouter.getPositionDebt(
+            accountId,
+            poolId,
+            address(susdcToken));
+
+        if(currentDebt < 0) {        
+            synthetixCoreRouter.mintUsd(
+                accountId,
+                poolId,
+                address(susdcToken),
+                uint256(-currentDebt)
+            );
+        }
+
+    }
+
     function prepareUnstake(uint256 amount) external onlyAdmin {
         uint256 susdcAmount = _convertUsdcToSusdc(amount);
         console.log("amount", amount);
@@ -146,12 +153,52 @@ contract StrategySynthetixV3 is Strategy {
 
         require(collateralAmount >= susdcAmount, "collateral is lower than prepare withdraw amount");
 
+        int256 currentDebt = synthetixCoreRouter.getPositionDebt(
+            accountId,
+            poolId,
+            address(susdcToken));
+
+        console.log("currentDebt", uint256(currentDebt));
+
+        if(currentDebt > 0) {
+            uint256 debtInUsdc = _convertSusdcToUsdc(uint256(currentDebt)) + 10;
+            require(debtInUsdc <= usdcToken.balanceOf(address(this)), "not enough usdc to pay for debt");     
+            usdcToken.approve(address(wrapperModule), debtInUsdc);
+
+            uint256 susdcAmountMin = _convertUsdcToSusdc(debtInUsdc);
+            console.log("susdcAmountMin", susdcAmountMin);
+
+            wrapperModule.wrap(marketId, debtInUsdc, susdcAmountMin);
+            
+            uint256 susdcBalance = susdcToken.balanceOf(address(this));
+
+            susdcToken.approve(address(synthetixCoreRouter), susdcBalance);
+
+            console.log("susdcBalance", susdcBalance);
+            
+            console.log("burnUsd", uint256(currentDebt));      
+            synthetixCoreRouter.burnUsd(
+                accountId,
+                poolId,
+                address(susdcToken),
+                uint256(currentDebt)
+            );
+
+        }
+
+        uint256 leverage;
+        if(collateralAmount == susdcAmount){
+            leverage = 0;
+        } else {
+            leverage = 1e18;
+        }
+        console.log("leverage", leverage);
         synthetixCoreRouter.delegateCollateral(
             accountId,
             poolId,
             address(susdcToken),
             collateralAmount - susdcAmount,
-            1e18);
+            leverage);
         console.log("end _unstake");
     }
 
@@ -208,9 +255,11 @@ contract StrategySynthetixV3 is Strategy {
         console.log("collateralAmount", collateralAmount);
         uint256 freeCollateral = synthetixCoreRouter.getAccountAvailableCollateral(accountId, address(susdcToken));
         console.log("freeCollateral", freeCollateral);
-        return _convertSusdcToUsdc(collateralAmount + freeCollateral);
+        uint256 susdcBalance = susdcToken.balanceOf(address(this));
+        uint256 usdcBalance = usdcToken.balanceOf(address(this));
 
 
+        return _convertSusdcToUsdc(collateralAmount + freeCollateral + susdcBalance) + usdcBalance;
     }
 
     function _claimRewards(address _beneficiary) internal override returns (uint256) {
@@ -257,6 +306,16 @@ contract StrategySynthetixV3 is Strategy {
 
     function _convertSusdcToUsdc(uint256 amount) internal view returns (uint256) {
         return amount * (usdcDecimals) / ( susdcDecimals);
+    }
+
+        /// @notice Used for ERC721 safeTransferFrom
+    function onERC721Received(address, address, uint256, bytes memory)
+    public
+    virtual
+    override
+    returns (bytes4)
+    {
+        return this.onERC721Received.selector;
     }
 
 }
