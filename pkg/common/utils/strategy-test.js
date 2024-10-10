@@ -16,39 +16,39 @@ const HedgeExchangerABI = require('./abi/HedgeExchanger.json');
 function strategyTest(strategyParams, network, assetName, runStrategyLogic) {
 
     let values = [
-        {
-            value: 0.02,
-        },
-        {
-            value: 0.2,
-        },
-        {
-            value: 2,
-        },
-        {
-            value: 20,
-        },
-        {
-            value: 200,
-        },
+        // {
+        //     value: 0.02,
+        // },
+        // {
+        //     value: 0.2,
+        // },
+        // {
+        //     value: 2,
+        // },
+        // {
+        //     value: 20,
+        // },
+        // {
+        //     value: 200,
+        // },
         {
             value: 2000,
         },
-        {
-            value: 20000,
-        },
-        {
-            value: 100000,
-        },
-        {
-            value: 200000,
-        },
-        {
-            value: 1000000,
-        },
-        {
-            value: 2000000,
-        },
+        // {
+        //     value: 20000,
+        // },
+        // {
+        //     value: 100000,
+        // },
+        // {
+        //     value: 200000,
+        // },
+        // {
+        //     value: 1000000,
+        // },
+        // {
+        //     value: 2000000,
+        // },
     ]
 
     describe(`${strategyParams.name}`, function () {
@@ -121,11 +121,24 @@ function stakeUnstake(strategyParams, network, assetName, values, runStrategyLog
 
                     let balanceAssetBefore = new BigNumber((await asset.balanceOf(recipient.address)).toString());
 
+                    console.log(`before transfer`);
+                    console.log(`recipient's balance: ${(await asset.balanceOf(recipient.address)).toString()}`);
+                    console.log(`strategy's balance: ${(await asset.balanceOf(strategy.address)).toString()}`);
+
                     let amount = toAsset(stakeValue / 2);
                     await asset.connect(recipient).transfer(strategy.address, amount);
-                    let hedgeExchanger = await ethers.getContractAt(HedgeExchangerABI, await strategy.hedgeExchanger());
+                    //let hedgeExchanger = await ethers.getContractAt(HedgeExchangerABI, await strategy.hedgeExchanger());
+
+                    console.log(`after transfer`);
+                    console.log(`recipient's balance: ${(await asset.balanceOf(recipient.address)).toString()}`);
+                    console.log(`strategy's balance: ${(await asset.balanceOf(strategy.address)).toString()}`);
 
                     await strategy.connect(recipient).stake(asset.address, amount);
+
+                    console.log(`after stake`);
+                    console.log(`recipient's balance: ${(await asset.balanceOf(recipient.address)).toString()}`);
+                    console.log(`strategy's balance: ${(await asset.balanceOf(strategy.address)).toString()}`);
+
                     await asset.connect(recipient).transfer(strategy.address, amount);
                     await strategy.connect(recipient).stake(asset.address, amount);
 

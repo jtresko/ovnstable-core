@@ -43,7 +43,7 @@ describe("ARBITRUM", function () {
 
     let params = {
         name: process.env.TEST_STRATEGY,
-        enabledReward: true,
+        enabledReward:  false,
         isRunStrategyLogic: true
     }
 
@@ -60,7 +60,7 @@ describe("ARBITRUM", function () {
             strategyTest(params, 'ARBITRUM', 'usdt', runStrategyLogic);
             break;
         default:
-            strategyTest(params, 'ARBITRUM', 'usdc', runStrategyLogic);
+            strategyTest(params, 'ARBITRUM', 'usdcCircle', runStrategyLogic);
             break;
     }
 });

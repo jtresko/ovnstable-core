@@ -9,6 +9,7 @@ import "@overnight-contracts/common/contracts/libraries/OvnMath.sol";
 
 import "./interfaces/IStrategy.sol";
 import "./interfaces/IRoleManager.sol";
+import "hardhat/console.sol";
 
 
 abstract contract Strategy is IStrategy, Initializable, AccessControlUpgradeable, UUPSUpgradeable {
@@ -86,6 +87,10 @@ abstract contract Strategy is IStrategy, Initializable, AccessControlUpgradeable
 
         uint256 minNavExpected = OvnMath.subBasisPoints(this.netAssetValue(), navSlippageBP);
 
+
+        console.log("Strategy.sol. stake()");
+        console.log("Strategy.sol. asset: ", _asset, " _amount passed: ", _amount);
+        console.log("Strategy.sol. bal to stake: ", IERC20(_asset).balanceOf(address(this)));
         _stake(_asset, IERC20(_asset).balanceOf(address(this)));
 
         require(this.netAssetValue() >= minNavExpected, "Strategy NAV less than expected");
